@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ============================================================ -->
+  <!--  TÍTULO DA ABA DO NAVEGADOR — EDITE AQUI                    -->
+  <!-- ============================================================ -->
+  <title>Para Você, Meu Amor 💙</title>
+
+  <!-- Fontes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================ */
+    /*  VARIÁVEIS DE COR — EDITE AQUI PARA MUDAR O TEMA            */
+    /* ============================================================ */
+    :root {
+      --azul-escuro:     #0a1628;   /* Fundo escuro, base */
+      --azul-marino:     #0f2952;   /* Seções com fundo */
+      --azul-medio:      #1a4a8a;   /* Destaques médios */
+      --azul-brilhante:  #3b82f6;   /* Azul vibrante (glow, bordas) */
+      --azul-claro:      #60a5fa;   /* Azul pastel suave */
+      --azul-pastel:     #bfdbfe;   /* Azul bem clarinho */
+      --branco:          #ffffff;
+      --branco-suave:    #f0f6ff;   /* Branco levemente azulado */
+      --texto-claro:     #e2eaf7;   /* Texto sobre fundo escuro */
+      --texto-suave:     #94b8e8;   /* Texto secundário */
+      --glow-color:      rgba(59, 130, 246, 0.4);
+
+      /* Tipografia */
+      --font-titulo:  'Playfair Display', Georgia, serif;
+      --font-corpo:   'Lato', 'Helvetica Neue', sans-serif;
+
+      /* Transições */
+      --transicao-suave: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    /* ============================================================ */
+    /*  RESET & BASE                                                */
+    /* ============================================================ */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-corpo);
+      background-color: var(--azul-escuro);
+      color: var(--texto-claro);
+      overflow-x: hidden;
+      cursor: default;
+    }
+
+    /* Scrollbar personalizada */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--azul-escuro); }
+    ::-webkit-scrollbar-thumb { background: var(--azul-medio); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--azul-brilhante); }
+
+    /* ============================================================ */
+    /*  CANVAS DE PARTÍCULAS (fundo animado)                       */
+    /* ============================================================ */
+    #particulas-canvas {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ============================================================ */
+    /*  NAVEGAÇÃO FLUTUANTE                                         */
+    /* ============================================================ */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      background: linear-gradient(to bottom, rgba(10,22,40,0.9) 0%, transparent 100%);
+      backdrop-filter: blur(2px);
+      transition: var(--transicao-suave);
+    }
+
+    nav a {
+      color: var(--azul-pastel);
+      text-decoration: none;
+      font-family: var(--font-corpo);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      opacity: 0.7;
+      transition: var(--transicao-suave);
+      position: relative;
+    }
+
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: -4px; left: 0;
+      width: 0; height: 1px;
+      background: var(--azul-brilhante);
+      transition: width 0.3s ease;
+    }
+
+    nav a:hover { opacity: 1; color: var(--branco); }
+    nav a:hover::after { width: 100%; }
+
+    /* ============================================================ */
+    /*  SEÇÃO HERO (TELA INICIAL)                                  */
+    /* ============================================================ */
+    #hero {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      min-height: 600px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    /* ============================================================ */
+    /*  FOTO DE FUNDO DO HERO — EDITE O src= ABAIXO                */
+    /* ============================================================ -->
+    <!-- (use uma URL pública ou caminho relativo da foto de vocês)  */
+    /* ============================================================ */
+    #hero-foto {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      z-index: 0;
+      filter: brightness(0.55) saturate(0.8);
+      transform: scale(1.05);
+      animation: hero-zoom 20s ease-in-out infinite alternate;
+    }
+
+    @keyframes hero-zoom {
+      from { transform: scale(1.05); }
+      to   { transform: scale(1.12); }
+    }
+
+    /* Overlay azulado sobre a foto */
+    #hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        160deg,
+        rgba(10, 22, 40, 0.55) 0%,
+        rgba(15, 41, 82, 0.45) 50%,
+        rgba(10, 22, 40, 0.75) 100%
+      );
+      z-index: 1;
+    }
+
+    /* Overlay de gradiente na borda inferior para transição suave */
+    #hero::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 180px;
+      background: linear-gradient(to top, var(--azul-escuro), transparent);
+      z-index: 2;
+    }
+
+    .hero-conteudo {
+      position: relative;
+      z-index: 3;
+      padding: 0 1.5rem;
+      max-width: 700px;
+      animation: hero-entrada 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      opacity: 0;
+    }
+
+    @keyframes hero-entrada {
+      from { opacity: 0; transform: translateY(40px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-subtitulo {
+      font-family: var(--font-corpo);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--azul-claro);
+      margin-bottom: 1rem;
+      opacity: 0;
+      animation: fade-up 0.8s 0.5s forwards;
+    }
+
+    /* ============================================================ */
+    /*  NOME/TÍTULO PRINCIPAL DO HERO — EDITE ABAIXO              */
+    /* ============================================================ */
+    .hero-titulo {
+      font-family: var(--font-titulo);
+      font-size: clamp(2.8rem, 8vw, 5.5rem);
+      font-weight: 700;
+      line-height: 1.1;
+      color: var(--branco);
+      margin-bottom: 1.5rem;
+      text-shadow: 0 0 60px rgba(59, 130, 246, 0.4);
+      opacity: 0;
+      animation: fade-up 0.9s 0.7s forwards;
+    }
+
+    .hero-titulo em {
+      font-style: italic;
+      color: var(--azul-claro);
+    }
+
+    .hero-frase {
+      font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+      font-weight: 300;
+      color: var(--texto-suave);
+      line-height: 1.7;
+      max-width: 480px;
+      margin: 0 auto 2.5rem;
+      opacity: 0;
+      animation: fade-up 0.9s 0.9s forwards;
+    }
+
+    .hero-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.9rem 2.2rem;
+      border-radius: 50px;
+      border: 1.5px solid var(--azul-brilhante);
+      background: rgba(59, 130, 246, 0.12);
+      color: var(--branco);
+      font-family: var(--font-corpo);
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-decoration: none;
+      cursor: pointer;
+      transition: var(--transicao-suave);
+      backdrop-filter: blur(8px);
+      box-shadow: 0 0 25px rgba(59, 130, 246, 0.2);
+      opacity: 0;
+      animation: fade-up 0.9s 1.1s forwards;
+    }
+
+    .hero-btn:hover {
+      background: rgba(59, 130, 246, 0.3);
+      box-shadow: 0 0 40px rgba(59, 130, 246, 0.4);
+      transform: translateY(-3px);
+    }
+
+    .hero-btn .seta {
+      font-size: 1.2rem;
+      animation: bounce-seta 1.5s ease-in-out infinite;
+    }
+
+    @keyframes bounce-seta {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(5px); }
+    }
+
+    /* ============================================================ */
+    /*  CONTADOR DE TEMPO                                           */
+    /* ============================================================ */
+    #contador {
+      position: relative;
+      z-index: 1;
+      padding: 5rem 1.5rem;
+      text-align: center;
+      background: linear-gradient(135deg, rgba(15,41,82,0.6) 0%, rgba(10,22,40,0.8) 100%);
+      border-top: 1px solid rgba(59,130,246,0.15);
+      border-bottom: 1px solid rgba(59,130,246,0.15);
+    }
+
+    .secao-rotulo {
+      font-family: var(--font-corpo);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--azul-brilhante);
+      margin-bottom: 0.7rem;
+    }
+
+    .secao-titulo {
+      font-family: var(--font-titulo);
+      font-size: clamp(1.9rem, 5vw, 3rem);
+      font-weight: 600;
+      color: var(--branco);
+      margin-bottom: 3rem;
+      line-height: 1.2;
+    }
+
+    .secao-titulo em {
+      font-style: italic;
+      color: var(--azul-claro);
+    }
+
+    .contador-grid {
+      display: flex;
+      justify-content: center;
+      gap: clamp(0.8rem, 3vw, 2.5rem);
+      flex-wrap: wrap;
+    }
+
+    .contador-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      position: relative;
+    }
+
+    .contador-numero {
+      font-family: var(--font-titulo);
+      font-size: clamp(2.5rem, 8vw, 5rem);
+      font-weight: 700;
+      line-height: 1;
+      color: var(--branco);
+      min-width: clamp(70px, 15vw, 110px);
+      text-align: center;
+      padding: 0.6rem 1rem 0.8rem;
+      border-radius: 16px;
+      background: rgba(26, 74, 138, 0.25);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      backdrop-filter: blur(10px);
+      box-shadow:
+        0 0 30px rgba(59, 130, 246, 0.15),
+        inset 0 1px 0 rgba(255,255,255,0.08);
+      animation: numero-pulse 3s ease-in-out infinite;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .contador-numero.atualizado {
+      transform: scale(1.08);
+      box-shadow: 0 0 45px rgba(59, 130, 246, 0.5);
+    }
+
+    @keyframes numero-pulse {
+      0%, 100% { box-shadow: 0 0 30px rgba(59,130,246,0.15), inset 0 1px 0 rgba(255,255,255,0.08); }
+      50%       { box-shadow: 0 0 50px rgba(59,130,246,0.30), inset 0 1px 0 rgba(255,255,255,0.08); }
+    }
+
+    .contador-label {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--texto-suave);
+    }
+
+    .contador-separador {
+      font-family: var(--font-titulo);
+      font-size: 3rem;
+      color: var(--azul-medio);
+      line-height: 1;
+      align-self: flex-start;
+      padding-top: 0.5rem;
+    }
+
+    /* ============================================================ */
+    /*  MURAL DE MEMÓRIAS (FOTOS)                                  */
+    /* ============================================================ */
+    #memorias {
+      position: relative;
+      z-index: 1;
+      padding: 5rem 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .secao-cabecalho {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    /* Grade de fotos — Desktop: 3 colunas | Mobile: scroll horizontal */
+    .memorias-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.2rem;
+    }
+
+    .foto-card {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      aspect-ratio: 3 / 4;
+      cursor: pointer;
+      background: var(--azul-marino);
+      border: 1px solid rgba(59, 130, 246, 0.15);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      transition: transform var(--transicao-suave), box-shadow var(--transicao-suave);
+    }
+
+    .foto-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: 0 20px 60px rgba(59,130,246,0.25), 0 0 0 1px rgba(59,130,246,0.4);
+    }
+
+    .foto-card:hover .foto-overlay {
+      opacity: 1;
+    }
+
+    /* ============================================================ */
+    /*  FOTOS DO MURAL — EDITE O src= DE CADA IMAGEM ABAIXO       */
+    /* ============================================================ */
+    .foto-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      display: block;
+      transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .foto-card:hover img {
+      transform: scale(1.07);
+    }
+
+    .foto-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(10,22,40,0.85) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      display: flex;
+      align-items: flex-end;
+      padding: 1.2rem;
+    }
+
+    .foto-legenda {
+      font-family: var(--font-titulo);
+      font-style: italic;
+      font-size: 0.95rem;
+      color: var(--branco);
+      line-height: 1.3;
+    }
+
+    /* Foto destaque: ocupa 2 colunas na linha */
+    .foto-card.destaque {
+      grid-column: span 2;
+      aspect-ratio: 16 / 9;
+    }
+
+    /* ============================================================ */
+    /*  A CARTA ABERTA                                             */
+    /* ============================================================ */
+    #carta {
+      position: relative;
+      z-index: 1;
+      padding: 5rem 1.5rem 6rem;
+    }
+
+    .carta-wrapper {
+      max-width: 780px;
+      margin: 0 auto;
+      position: relative;
+    }
+
+    /* Card glassmorphism com borda brilhante */
+    .carta-card {
+      background: rgba(15, 30, 60, 0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 24px;
+      border: 1px solid rgba(59, 130, 246, 0.35);
+      padding: clamp(2rem, 6vw, 4rem);
+      position: relative;
+      overflow: hidden;
+      box-shadow:
+        0 0 0 1px rgba(59,130,246,0.1),
+        0 30px 80px rgba(0,0,0,0.5),
+        inset 0 1px 0 rgba(255,255,255,0.08);
+    }
+
+    /* Brilho animado na borda */
+    .carta-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 200%; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--azul-brilhante), transparent);
+      animation: borda-brilho 4s linear infinite;
+    }
+
+    @keyframes borda-brilho {
+      from { left: -100%; }
+      to   { left: 100%; }
+    }
+
+    /* Textura de papel simulada */
+    .carta-card::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(59,130,246,0.04) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(59,130,246,0.04) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .carta-icone {
+      text-align: center;
+      font-size: 2.5rem;
+      margin-bottom: 1.5rem;
+      animation: icone-pulsar 2s ease-in-out infinite;
+    }
+
+    @keyframes icone-pulsar {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(59,130,246,0.4)); }
+      50%       { transform: scale(1.1); filter: drop-shadow(0 0 18px rgba(59,130,246,0.7)); }
+    }
+
+    /* ============================================================ */
+    /*  TÍTULO DA CARTA — ANIMAÇÃO MÁQUINA DE ESCREVER             */
+    /* ============================================================ */
+    .carta-titulo {
+      font-family: var(--font-titulo);
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-weight: 700;
+      font-style: italic;
+      color: var(--branco);
+      text-align: center;
+      margin-bottom: 0.5rem;
+      min-height: 1.2em;
+    }
+
+    .cursor-digitando {
+      display: inline-block;
+      width: 2px;
+      height: 1em;
+      background: var(--azul-brilhante);
+      margin-left: 3px;
+      vertical-align: middle;
+      animation: piscar-cursor 0.8s steps(1) infinite;
+    }
+
+    @keyframes piscar-cursor {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0; }
+    }
+
+    .carta-divider {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 1.5rem 0 2rem;
+    }
+
+    .carta-divider span {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(59,130,246,0.4), transparent);
+    }
+
+    .carta-divider .florzinha { color: var(--azul-claro); font-size: 1rem; }
+
+    /* ============================================================ */
+    /*  TEXTO DA CARTA — EDITE OS PARÁGRAFOS ABAIXO                */
+    /* ============================================================ */
+    .carta-paragrafo {
+      font-size: clamp(0.95rem, 2.5vw, 1.05rem);
+      font-weight: 300;
+      line-height: 1.85;
+      color: var(--texto-claro);
+      margin-bottom: 1.4rem;
+      opacity: 0;
+      transform: translateY(15px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .carta-paragrafo.visivel {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .carta-paragrafo strong {
+      color: var(--azul-claro);
+      font-weight: 700;
+    }
+
+    .carta-assinatura {
+      text-align: right;
+      font-family: var(--font-titulo);
+      font-style: italic;
+      font-size: 1.3rem;
+      color: var(--azul-claro);
+      margin-top: 2rem;
+      opacity: 0;
+      transition: opacity 0.8s ease 0.3s;
+    }
+
+    .carta-assinatura.visivel {
+      opacity: 1;
+    }
+
+    /* ============================================================ */
+    /*  RODAPÉ                                                      */
+    /* ============================================================ */
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 3rem 1rem;
+      border-top: 1px solid rgba(59,130,246,0.12);
+    }
+
+    .footer-coracao {
+      font-size: 2rem;
+      animation: icone-pulsar 2s ease-in-out infinite;
+      display: block;
+      margin-bottom: 0.8rem;
+    }
+
+    .footer-texto {
+      font-size: 0.8rem;
+      color: var(--texto-suave);
+      letter-spacing: 0.1em;
+    }
+
+    /* ============================================================ */
+    /*  ANIMAÇÕES DE SCROLL (revelação dos elementos)              */
+    /* ============================================================ */
+    .revelar {
+      opacity: 0;
+      transform: translateY(35px);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .revelar.visivel {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .revelar-delay-1 { transition-delay: 0.1s; }
+    .revelar-delay-2 { transition-delay: 0.2s; }
+    .revelar-delay-3 { transition-delay: 0.3s; }
+    .revelar-delay-4 { transition-delay: 0.4s; }
+    .revelar-delay-5 { transition-delay: 0.5s; }
+    .revelar-delay-6 { transition-delay: 0.6s; }
+
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ============================================================ */
+    /*  RESPONSIVIDADE MOBILE                                       */
+    /* ============================================================ */
+    @media (max-width: 768px) {
+      nav {
+        gap: 1rem;
+        padding: 1rem 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      nav a { font-size: 0.68rem; }
+
+      /* Grade de fotos vira scroll horizontal no mobile */
+      .memorias-grid {
+        display: flex;
+        overflow-x: auto;
+        gap: 1rem;
+        padding-bottom: 1rem;
+        scroll-snap-type: x mandatory;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+
+      .memorias-grid::-webkit-scrollbar { display: none; }
+
+      .foto-card {
+        flex: 0 0 75vw;
+        max-width: 300px;
+        scroll-snap-align: center;
+        aspect-ratio: 3 / 4;
+      }
+
+      .foto-card.destaque {
+        flex: 0 0 85vw;
+        max-width: 340px;
+        aspect-ratio: 4 / 5;
+      }
+
+      .contador-separador { display: none; }
+
+      .contador-grid { gap: 0.6rem; }
+
+      .contador-numero { font-size: clamp(2rem, 10vw, 2.8rem); min-width: 68px; padding: 0.5rem 0.7rem; }
+    }
+
+    /* Tablet */
+    @media (min-width: 769px) and (max-width: 1024px) {
+      .memorias-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .foto-card.destaque {
+        grid-column: span 2;
+        aspect-ratio: 16 / 8;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ============================================================ -->
+  <!--  CANVAS DE PARTÍCULAS (gerado automaticamente pelo JS)      -->
+  <!-- ============================================================ -->
+  <canvas id="particulas-canvas"></canvas>
+
+  <!-- ============================================================ -->
+  <!--  NAVEGAÇÃO                                                   -->
+  <!-- ============================================================ -->
+  <nav>
+    <a href="#contador">Nosso Tempo</a>
+    <a href="#memorias">Memórias</a>
+    <a href="#carta">Minha Carta</a>
+  </nav>
+
+  <!-- ============================================================ -->
+  <!--  SEÇÃO 1: HERO — FOTO DE CAPA                               -->
+  <!--  ↓ EDITE O src= ABAIXO COM A URL/CAMINHO DA FOTO DE VOCÊS  -->
+  <!-- ============================================================ -->
+  <section id="hero">
+    <img
+      id="hero-foto"
+      src=foto-principal.jpg
+      alt="Nossa Foto"
+    />
+
+    <div class="hero-conteudo">
+      <!-- EDITE O SUBTÍTULO ABAIXO -->
+      <p class="hero-subtitulo">✦ Meu presente para o meu amor ✦</p>
+
+      <!-- EDITE O NOME ABAIXO -->
+      <h1 class="hero-titulo">
+        Para a minha <em>queridinha</em>,<br>que é o meu mundo
+      </h1>
+
+      <!-- EDITE A FRASE ABAIXO -->
+      <p class="hero-frase">
+        Cada dia ao seu lado é um presente que eu nunca imaginei
+        merecer. Você é especial demais pra mim...<br>Que você saiba o taaanto que eu te amo! 💙
+      </p>
+
+      <a href="#contador" class="hero-btn">
+        Continue lendo
+        <span class="seta">↓</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!--  SEÇÃO 2: CONTADOR DE TEMPO                                 -->
+  <!-- ============================================================ -->
+  <section id="contador">
+    <p class="secao-rotulo revelar">💙 Nosso Amor em Números</p>
+
+    <!-- EDITE O TÍTULO ABAIXO -->
+    <h2 class="secao-titulo revelar revelar-delay-1">
+      Lembra quando <em>tudo</em> começou?
+    </h2>
+
+    <div class="contador-grid revelar revelar-delay-2">
+
+      <div class="contador-item">
+        <span class="contador-numero" id="cnt-anos">00</span>
+        <span class="contador-label">Ano</span>
+      </div>
+
+      <div class="contador-separador">:</div>
+
+      <div class="contador-item">
+        <span class="contador-numero" id="cnt-dias">000</span>
+        <span class="contador-label">Dias</span>
+      </div>
+
+      <div class="contador-separador">:</div>
+
+      <div class="contador-item">
+        <span class="contador-numero" id="cnt-horas">00</span>
+        <span class="contador-label">Horas</span>
+      </div>
+
+      <div class="contador-separador">:</div>
+
+      <div class="contador-item">
+        <span class="contador-numero" id="cnt-minutos">00</span>
+        <span class="contador-label">Minutos</span>
+      </div>
+
+      <div class="contador-separador">:</div>
+
+      <div class="contador-item">
+        <span class="contador-numero" id="cnt-segundos">00</span>
+        <span class="contador-label">Segundos</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!--  SEÇÃO 3: MURAL DE MEMÓRIAS                                 -->
+  <!--  ↓ EDITE OS src= DAS IMAGENS E AS LEGENDAS ABAIXO          -->
+  <!-- ============================================================ -->
+  <section id="memorias">
+    <div class="secao-cabecalho">
+      <p class="secao-rotulo revelar">Nossa História</p>
+      <h2 class="secao-titulo revelar revelar-delay-1">
+        Momentos que <em>nós vivemos</em>
+      </h2>
+    </div>
+
+    <div class="memorias-grid">
+
+      <!-- FOTO 1 — DESTAQUE (ocupa 2 colunas no desktop) -->
+      <!-- EDITE o src= e a legenda abaixo -->
+      <div class="foto-card destaque revelar revelar-delay-1">
+        <img
+          src="https://images.unsplash.com/photo-1529634597503-139d3726fed5?w=900&q=80"
+          alt="Memória 1"
+        />
+        <div class="foto-overlay">
+          <!-- EDITE A LEGENDA ABAIXO -->
+          <p class="foto-legenda">O começo de tudo 💙</p>
+        </div>
+      </div>
+
+      <!-- FOTO 2 -->
+      <!-- EDITE o src= e a legenda abaixo -->
+      <div class="foto-card revelar revelar-delay-2">
+        <img
+          src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=600&q=80"
+          alt="Memória 2"
+        />
+        <div class="foto-overlay">
+          <!-- EDITE A LEGENDA ABAIXO -->
+          <p class="foto-legenda">Nosso primeiro passeio 🌊</p>
+        </div>
+      </div>
+
+      <!-- FOTO 3 -->
+      <!-- EDITE o src= e a legenda abaixo -->
+      <div class="foto-card revelar revelar-delay-3">
+        <img
+          src="https://images.unsplash.com/photo-1520974735614-bfcda38a1b59?w=600&q=80"
+          alt="Memória 3"
+        />
+        <div class="foto-overlay">
+          <!-- EDITE A LEGENDA ABAIXO -->
+          <p class="foto-legenda">Gargalhadas sem fim 😄</p>
+        </div>
+      </div>
+
+      <!-- FOTO 4 -->
+      <!-- EDITE o src= e a legenda abaixo -->
+      <div class="foto-card revelar revelar-delay-4">
+        <img
+          src="https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&q=80"
+          alt="Memória 4"
+        />
+        <div class="foto-overlay">
+          <!-- EDITE A LEGENDA ABAIXO -->
+          <p class="foto-legenda">Nosso cantinho especial 🏠</p>
+        </div>
+      </div>
+
+      <!-- FOTO 5 -->
+      <!-- EDITE o src= e a legenda abaixo -->
+      <div class="foto-card revelar revelar-delay-5">
+        <img
+          src="https://images.unsplash.com/photo-1502082553048-f009c37129b9?w=600&q=80"
+          alt="Memória 5"
+        />
+        <div class="foto-overlay">
+          <!-- EDITE A LEGENDA ABAIXO -->
+          <p class="foto-legenda">A natureza como palco 🌿</p>
+        </div>
+      </div>
+
+      <!-- FOTO 6 -->
+      <!-- EDITE o src= e a legenda abaixo -->
+      <div class="foto-card revelar revelar-delay-6">
+        <img
+          src="https://images.unsplash.com/photo-1501555088652-021faa106b9b?w=600&q=80"
+          alt="Memória 6"
+        />
+        <div class="foto-overlay">
+          <!-- EDITE A LEGENDA ABAIXO -->
+          <p class="foto-legenda">Aventuras que virão 🌅</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!--  SEÇÃO 4: A CARTA ABERTA                                    -->
+  <!-- ============================================================ -->
+  <section id="carta">
+    <div class="carta-wrapper">
+      <div class="secao-cabecalho" style="margin-bottom: 2.5rem;">
+        <p class="secao-rotulo revelar">💌 Palavras do Coração</p>
+        <h2 class="secao-titulo revelar revelar-delay-1">
+          Uma carta <em>só para você</em>
+        </h2>
+      </div>
+
+      <div class="carta-card revelar revelar-delay-2">
+        <div class="carta-icone">💙</div>
+
+        <!-- TÍTULO COM ANIMAÇÃO DE MÁQUINA DE ESCREVER -->
+        <!-- EDITE O TEXTO ABAIXO (o JS vai usar esse conteúdo) -->
+        <h3 class="carta-titulo" id="carta-titulo-texto">
+          <span id="carta-titulo-digitando"></span><span class="cursor-digitando" id="cursor-carta"></span>
+        </h3>
+
+        <div class="carta-divider">
+          <span></span>
+          <span class="florzinha">✦</span>
+          <span></span>
+        </div>
+
+        <!-- ======================================================= -->
+        <!--  PARÁGRAFOS DA CARTA — EDITE LIVREMENTE ABAIXO         -->
+        <!-- ======================================================= -->
+        <p class="carta-paragrafo" id="p1">
+          Desde que você entrou na minha vida, tudo ficou mais colorido, mais leve e mais cheio de significado.
+          Você me ensinou que o amor de verdade não precisa ser perfeito — ele só precisa ser <strong>honesto, presente e gentil</strong>.
+        </p>
+
+        <p class="carta-paragrafo" id="p2">
+          Eu me lembro do dia em que nos encontramos, como se o universo tivesse colocado as estrelas no lugar certo
+          naquele momento. Cada sorriso seu é uma luz que ilumina os meus dias mais difíceis, e eu sou grato(a)
+          todos os dias por poder chamar você de <strong>meu amor</strong>.
+        </p>
+
+        <p class="carta-paragrafo" id="p3">
+          Nos dias cinzas, você é a minha cor preferida. Nos dias ensolarados, você é a razão do meu sorriso.
+          Quero construir mil memórias ao seu lado, viver aventuras pequenas e grandes, e crescer junto com você,
+          um dia de cada vez.
+        </p>
+
+        <p class="carta-paragrafo" id="p4">
+          Feliz Dia dos Namorados, meu amor. <strong>Você merece o mundo inteiro</strong> — e eu vou te dar
+          cada pedacinho que eu puder. Te amo hoje, amanhã, e em todos os dias que ainda estão por vir. 💙
+        </p>
+
+        <!-- EDITE A ASSINATURA ABAIXO -->
+        <p class="carta-assinatura" id="carta-assinatura">
+          Com todo o meu amor,<br>
+          <em>Seu(sua) eterno(a) parceiro(a) 💙</em>
+        </p>
+        <!-- ======================================================= -->
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!--  RODAPÉ                                                      -->
+  <!-- ============================================================ -->
+  <footer>
+    <span class="footer-coracao">💙</span>
+    <!-- EDITE O TEXTO DO RODAPÉ ABAIXO -->
+    <p class="footer-texto">Feito com muito amor · Para você, sempre 💙</p>
+  </footer>
+
+  <!-- ============================================================ -->
+  <!--  JAVASCRIPT                                                  -->
+  <!-- ============================================================ -->
+  <script>
+    /* ==============================================================
+     *  CONFIGURAÇÕES PRINCIPAIS — EDITE AQUI SE NECESSÁRIO
+     * ============================================================ */
+
+    // DATA DE INÍCIO DO RELACIONAMENTO (Dia, Mês, Ano, Hora, Minuto)
+    const INICIO_ANO   = 2025;
+    const INICIO_MES   = 1;    // Janeiro = 1, Fevereiro = 2 ...
+    const INICIO_DIA   = 25;
+    const INICIO_HORA  = 19;
+    const INICIO_MIN   = 0;
+
+    // TÍTULO DA CARTA (será digitado com efeito máquina de escrever)
+    const TITULO_CARTA = "Para o amor da minha vida...";
+
+    /* ==============================================================
+     *  1. PARTÍCULAS DE FUNDO (Corações e estrelas)
+     * ============================================================ */
+    (function() {
+      const canvas = document.getElementById('particulas-canvas');
+      const ctx    = canvas.getContext('2d');
+
+      let particulas = [];
+      let largura, altura;
+
+      function redimensionar() {
+        largura = canvas.width  = window.innerWidth;
+        altura  = canvas.height = window.innerHeight;
+      }
+
+      // Corações SVG desenhados em Canvas
+      function desenharCoracao(ctx, x, y, tamanho, cor, alfa) {
+        ctx.save();
+        ctx.globalAlpha = alfa;
+        ctx.fillStyle   = cor;
+        ctx.translate(x, y);
+        ctx.scale(tamanho, tamanho);
+        ctx.beginPath();
+        // Bezier do coração
+        ctx.moveTo(0, -0.3);
+        ctx.bezierCurveTo(0, -0.7, -0.7, -0.7, -0.7, -0.2);
+        ctx.bezierCurveTo(-0.7,  0.2, -0.3,  0.5,  0,  0.7);
+        ctx.bezierCurveTo( 0.3,  0.5,  0.7,  0.2,  0.7, -0.2);
+        ctx.bezierCurveTo( 0.7, -0.7,  0,   -0.7,  0,  -0.3);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function criarParticula() {
+        const tipos  = ['coração', 'estrela', 'ponto'];
+        const cores  = [
+          '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe',
+          '#1d4ed8', '#2563eb', '#ffffff'
+        ];
+        return {
+          x:      Math.random() * largura,
+          y:      Math.random() * altura + altura,
+          vx:     (Math.random() - 0.5) * 0.4,
+          vy:     -(Math.random() * 0.6 + 0.2),
+          tamanho: Math.random() * 10 + 4,
+          cor:    cores[Math.floor(Math.random() * cores.length)],
+          alfa:   Math.random() * 0.35 + 0.05,
+          tipo:   tipos[Math.floor(Math.random() * tipos.length)],
+          rotacao: Math.random() * Math.PI * 2,
+          rotVel:  (Math.random() - 0.5) * 0.02,
+        };
+      }
+
+      function iniciarParticulas() {
+        particulas = [];
+        const qtd = Math.min(Math.floor(largura / 16), 70);
+        for (let i = 0; i < qtd; i++) {
+          const p = criarParticula();
+          p.y = Math.random() * altura; // distribuir na tela inicialmente
+          particulas.push(p);
+        }
+      }
+
+      function animar() {
+        ctx.clearRect(0, 0, largura, altura);
+
+        particulas.forEach((p, i) => {
+          p.x  += p.vx;
+          p.y  += p.vy;
+          p.rotacao += p.rotVel;
+
+          // Reaparecer na base ao sair pelo topo
+          if (p.y < -50) {
+            particulas[i] = criarParticula();
+            return;
+          }
+
+          if (p.tipo === 'coração') {
+            desenharCoracao(ctx, p.x, p.y, p.tamanho, p.cor, p.alfa);
+          } else if (p.tipo === 'estrela') {
+            ctx.save();
+            ctx.globalAlpha = p.alfa;
+            ctx.fillStyle   = p.cor;
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rotacao);
+            ctx.beginPath();
+            const pts = 4;
+            for (let j = 0; j < pts * 2; j++) {
+              const ang = (j * Math.PI) / pts;
+              const r   = j % 2 === 0 ? p.tamanho * 0.5 : p.tamanho * 0.2;
+              j === 0
+                ? ctx.moveTo(Math.cos(ang) * r, Math.sin(ang) * r)
+                : ctx.lineTo(Math.cos(ang) * r, Math.sin(ang) * r);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+          } else {
+            ctx.save();
+            ctx.globalAlpha = p.alfa;
+            ctx.fillStyle   = p.cor;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.tamanho * 0.25, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+        });
+
+        requestAnimationFrame(animar);
+      }
+
+      redimensionar();
+      iniciarParticulas();
+      animar();
+      window.addEventListener('resize', () => {
+        redimensionar();
+        iniciarParticulas();
+      });
+    })();
+
+    /* ==============================================================
+     *  2. CONTADOR DE TEMPO REAL
+     * ============================================================ */
+    (function() {
+      const inicio = new Date(INICIO_ANO, INICIO_MES - 1, INICIO_DIA, INICIO_HORA, INICIO_MIN, 0);
+
+      const elAnos    = document.getElementById('cnt-anos');
+      const elDias    = document.getElementById('cnt-dias');
+      const elHoras   = document.getElementById('cnt-horas');
+      const elMinutos = document.getElementById('cnt-minutos');
+      const elSeg     = document.getElementById('cnt-segundos');
+
+      function pad(n, tamanho) {
+        return String(n).padStart(tamanho, '0');
+      }
+
+      function calcularIdade(inicio, agora) {
+        let anos = agora.getFullYear() - inicio.getFullYear();
+        const mesInicio  = inicio.getMonth();
+        const diaInicio  = inicio.getDate();
+        const horaInicio = inicio.getHours();
+        const minInicio  = inicio.getMinutes();
+
+        const mesAgora  = agora.getMonth();
+        const diaAgora  = agora.getDate();
+        const horaAgora = agora.getHours();
+        const minAgora  = agora.getMinutes();
+        const segAgora  = agora.getSeconds();
+
+        // Ajusta se ainda não passou o aniversário este ano
+        if (
+          mesAgora  <  mesInicio ||
+          (mesAgora === mesInicio && diaAgora  <  diaInicio) ||
+          (mesAgora === mesInicio && diaAgora === diaInicio && horaAgora <  horaInicio) ||
+          (mesAgora === mesInicio && diaAgora === diaInicio && horaAgora === horaInicio && minAgora < minInicio)
+        ) {
+          anos--;
+        }
+
+        // Data do último aniversário
+        let aniverDeste = new Date(agora.getFullYear(), mesInicio, diaInicio, horaInicio, minInicio, 0);
+        if (aniverDeste > agora) {
+          aniverDeste = new Date(agora.getFullYear() - 1, mesInicio, diaInicio, horaInicio, minInicio, 0);
+        }
+
+        const diffMs = agora - aniverDeste;
+        const diffSeg = Math.floor(diffMs / 1000);
+        const totalMin = Math.floor(diffSeg / 60);
+        const totalHoras = Math.floor(totalMin / 60);
+        const dias  = Math.floor(totalHoras / 24);
+        const horas = totalHoras % 24;
+        const min   = totalMin % 60;
+        const seg   = diffSeg % 60;
+
+        return { anos, dias, horas, min, seg };
+      }
+
+      function piscar(el) {
+        el.classList.add('atualizado');
+        setTimeout(() => el.classList.remove('atualizado'), 300);
+      }
+
+      let segAnterior = -1;
+
+      function atualizar() {
+        const agora = new Date();
+        const { anos, dias, horas, min, seg } = calcularIdade(inicio, agora);
+
+        if (seg !== segAnterior) {
+          segAnterior = seg;
+          elAnos.textContent    = pad(anos, 2);
+          elDias.textContent    = pad(dias, 3);
+          elHoras.textContent   = pad(horas, 2);
+          elMinutos.textContent = pad(min, 2);
+          elSeg.textContent     = pad(seg, 2);
+          piscar(elSeg);
+        }
+      }
+
+      atualizar();
+      setInterval(atualizar, 500);
+    })();
+
+    /* ==============================================================
+     *  3. ANIMAÇÕES DE SCROLL (Intersection Observer)
+     * ============================================================ */
+    (function() {
+      const obs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach(e => {
+            if (e.isIntersecting) {
+              e.target.classList.add('visivel');
+            }
+          });
+        },
+        { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+      );
+
+      document.querySelectorAll('.revelar').forEach(el => obs.observe(el));
+    })();
+
+    /* ==============================================================
+     *  4. ANIMAÇÃO DE MÁQUINA DE ESCREVER (Título da Carta)
+     * ============================================================ */
+    (function() {
+      const titulo = TITULO_CARTA;
+      const el     = document.getElementById('carta-titulo-digitando');
+      const cursor = document.getElementById('cursor-carta');
+      let   idx    = 0;
+      let   iniciou = false;
+
+      // Só começa quando o elemento entrar na tela
+      const obs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach(e => {
+            if (e.isIntersecting && !iniciou) {
+              iniciou = true;
+              obs.disconnect();
+              setTimeout(digitar, 400);
+            }
+          });
+        },
+        { threshold: 0.4 }
+      );
+
+      const cartaCard = document.querySelector('.carta-card');
+      if (cartaCard) obs.observe(cartaCard);
+
+      function digitar() {
+        if (idx <= titulo.length) {
+          el.textContent = titulo.slice(0, idx);
+          idx++;
+          setTimeout(digitar, 55);
+        } else {
+          // Cursor some após terminar
+          setTimeout(() => {
+            if (cursor) cursor.style.display = 'none';
+          }, 1500);
+          revelarParafagos();
+        }
+      }
+    })();
+
+    /* ==============================================================
+     *  5. REVELAÇÃO SEQUENCIAL DOS PARÁGRAFOS DA CARTA
+     * ============================================================ */
+    function revelarParafagos() {
+      const ids   = ['p1', 'p2', 'p3', 'p4', 'carta-assinatura'];
+      const delay = 500;
+      ids.forEach((id, i) => {
+        setTimeout(() => {
+          const el = document.getElementById(id);
+          if (el) el.classList.add('visivel');
+        }, i * delay);
+      });
+    }
+
+    // Fallback: se o usuário já estiver na carta ao carregar
+    (function() {
+      const obs = new IntersectionObserver(
+        (entries) => {
+          entries.forEach(e => {
+            if (e.isIntersecting) {
+              revelarParafagos();
+              obs.disconnect();
+            }
+          });
+        },
+        { threshold: 0.3 }
+      );
+      const carta = document.getElementById('carta');
+      if (carta) obs.observe(carta);
+    })();
+
+    /* ==============================================================
+     *  6. EFEITO DE TOQUE NOS NÚMEROS DO CONTADOR (mobile)
+     * ============================================================ */
+    document.querySelectorAll('.contador-numero').forEach(el => {
+      el.addEventListener('click', () => {
+        el.classList.add('atualizado');
+        setTimeout(() => el.classList.remove('atualizado'), 400);
+      });
+    });
+  </script>
+
+</body>
+</html>
