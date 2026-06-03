@@ -7,7 +7,8 @@
   <!-- ============================================================ -->
   <!--  TÍTULO DA ABA DO NAVEGADOR — EDITE AQUI                    -->
   <!-- ============================================================ -->
-  <title>Para Você, Meu Amor 💙</title>
+  <title>Para queridinha 💙</title>
+  <link rel="icon" type="image/jpg" href="fotos/favicon.jpg" />
 
   <!-- Fontes -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -316,9 +317,17 @@
 
     .contador-grid {
       display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.2rem;
+    }
+
+    .contador-linha {
+      display: flex;
       justify-content: center;
-      gap: clamp(0.8rem, 3vw, 2.5rem);
-      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: clamp(0.6rem, 2.5vw, 2rem);
+      flex-wrap: nowrap;
     }
 
     .contador-item {
@@ -703,9 +712,11 @@
         aspect-ratio: 4 / 5;
       }
 
-      .contador-separador { display: none; }
+      .contador-separador { font-size: 1.8rem; padding-top: 0.4rem; }
 
-      .contador-grid { gap: 0.6rem; }
+      .contador-linha { gap: 0.5rem; }
+
+      .contador-grid { gap: 1rem; }
 
       .contador-numero { font-size: clamp(2rem, 10vw, 2.8rem); min-width: 68px; padding: 0.5rem 0.7rem; }
     }
@@ -785,37 +796,52 @@
 
     <div class="contador-grid revelar revelar-delay-2">
 
-      <div class="contador-item">
-        <span class="contador-numero" id="cnt-anos">00</span>
-        <span class="contador-label">Ano</span>
+      <!-- LINHA 1: Anos · Meses · Dias -->
+      <div class="contador-linha">
+
+        <div class="contador-item">
+          <span class="contador-numero" id="cnt-anos">00</span>
+          <span class="contador-label">Ano</span>
+        </div>
+
+        <div class="contador-separador">·</div>
+
+        <div class="contador-item">
+          <span class="contador-numero" id="cnt-meses">00</span>
+          <span class="contador-label">Meses</span>
+        </div>
+
+        <div class="contador-separador">·</div>
+
+        <div class="contador-item">
+          <span class="contador-numero" id="cnt-dias">00</span>
+          <span class="contador-label">Dias</span>
+        </div>
+
       </div>
 
-      <div class="contador-separador">:</div>
+      <!-- LINHA 2: Horas · Minutos · Segundos -->
+      <div class="contador-linha">
 
-      <div class="contador-item">
-        <span class="contador-numero" id="cnt-dias">000</span>
-        <span class="contador-label">Dias</span>
-      </div>
+        <div class="contador-item">
+          <span class="contador-numero" id="cnt-horas">00</span>
+          <span class="contador-label">Horas</span>
+        </div>
 
-      <div class="contador-separador">:</div>
+        <div class="contador-separador">:</div>
 
-      <div class="contador-item">
-        <span class="contador-numero" id="cnt-horas">00</span>
-        <span class="contador-label">Horas</span>
-      </div>
+        <div class="contador-item">
+          <span class="contador-numero" id="cnt-minutos">00</span>
+          <span class="contador-label">Minutos</span>
+        </div>
 
-      <div class="contador-separador">:</div>
+        <div class="contador-separador">:</div>
 
-      <div class="contador-item">
-        <span class="contador-numero" id="cnt-minutos">00</span>
-        <span class="contador-label">Minutos</span>
-      </div>
+        <div class="contador-item">
+          <span class="contador-numero" id="cnt-segundos">00</span>
+          <span class="contador-label">Segundos</span>
+        </div>
 
-      <div class="contador-separador">:</div>
-
-      <div class="contador-item">
-        <span class="contador-numero" id="cnt-segundos">00</span>
-        <span class="contador-label">Segundos</span>
       </div>
 
     </div>
@@ -989,7 +1015,7 @@
       <div class="secao-cabecalho" style="margin-bottom: 2.5rem;">
         <p class="secao-rotulo revelar">💌 Palavras do Coração</p>
         <h2 class="secao-titulo revelar revelar-delay-1">
-          Uma carta <em>só para você</em>
+          Minha <em>declaração</em> para você
         </h2>
       </div>
 
@@ -1198,6 +1224,7 @@
       const inicio = new Date(INICIO_ANO, INICIO_MES - 1, INICIO_DIA, INICIO_HORA, INICIO_MIN, 0);
 
       const elAnos    = document.getElementById('cnt-anos');
+      const elMeses   = document.getElementById('cnt-meses');
       const elDias    = document.getElementById('cnt-dias');
       const elHoras   = document.getElementById('cnt-horas');
       const elMinutos = document.getElementById('cnt-minutos');
@@ -1208,44 +1235,42 @@
       }
 
       function calcularIdade(inicio, agora) {
-        let anos = agora.getFullYear() - inicio.getFullYear();
-        const mesInicio  = inicio.getMonth();
-        const diaInicio  = inicio.getDate();
-        const horaInicio = inicio.getHours();
-        const minInicio  = inicio.getMinutes();
+        let anos  = agora.getFullYear() - inicio.getFullYear();
+        let meses = agora.getMonth()    - inicio.getMonth();
+        let dias  = agora.getDate()     - inicio.getDate();
 
-        const mesAgora  = agora.getMonth();
-        const diaAgora  = agora.getDate();
-        const horaAgora = agora.getHours();
-        const minAgora  = agora.getMinutes();
-        const segAgora  = agora.getSeconds();
+        // Ajusta dias negativos: pega os dias do mês anterior
+        if (dias < 0) {
+          meses--;
+          const mesAnterior = new Date(agora.getFullYear(), agora.getMonth(), 0);
+          dias += mesAnterior.getDate();
+        }
 
-        // Ajusta se ainda não passou o aniversário este ano
-        if (
-          mesAgora  <  mesInicio ||
-          (mesAgora === mesInicio && diaAgora  <  diaInicio) ||
-          (mesAgora === mesInicio && diaAgora === diaInicio && horaAgora <  horaInicio) ||
-          (mesAgora === mesInicio && diaAgora === diaInicio && horaAgora === horaInicio && minAgora < minInicio)
-        ) {
+        // Ajusta meses negativos: vira para o ano anterior
+        if (meses < 0) {
           anos--;
+          meses += 12;
         }
 
-        // Data do último aniversário
-        let aniverDeste = new Date(agora.getFullYear(), mesInicio, diaInicio, horaInicio, minInicio, 0);
-        if (aniverDeste > agora) {
-          aniverDeste = new Date(agora.getFullYear() - 1, mesInicio, diaInicio, horaInicio, minInicio, 0);
+        // Horas, minutos e segundos restantes do dia atual
+        let horas = agora.getHours()   - inicio.getHours();
+        let min   = agora.getMinutes() - inicio.getMinutes();
+        let seg   = agora.getSeconds() - inicio.getSeconds();
+
+        if (seg < 0)  { seg += 60; min--; }
+        if (min < 0)  { min += 60; horas--; }
+        if (horas < 0) {
+          horas += 24;
+          dias--;
+          if (dias < 0) {
+            meses--;
+            if (meses < 0) { meses += 12; anos--; }
+            const mesAnterior2 = new Date(agora.getFullYear(), agora.getMonth(), 0);
+            dias += mesAnterior2.getDate();
+          }
         }
 
-        const diffMs = agora - aniverDeste;
-        const diffSeg = Math.floor(diffMs / 1000);
-        const totalMin = Math.floor(diffSeg / 60);
-        const totalHoras = Math.floor(totalMin / 60);
-        const dias  = Math.floor(totalHoras / 24);
-        const horas = totalHoras % 24;
-        const min   = totalMin % 60;
-        const seg   = diffSeg % 60;
-
-        return { anos, dias, horas, min, seg };
+        return { anos, meses, dias, horas, min, seg };
       }
 
       function piscar(el) {
@@ -1257,15 +1282,16 @@
 
       function atualizar() {
         const agora = new Date();
-        const { anos, dias, horas, min, seg } = calcularIdade(inicio, agora);
+        const { anos, meses, dias, horas, min, seg } = calcularIdade(inicio, agora);
 
         if (seg !== segAnterior) {
           segAnterior = seg;
-          elAnos.textContent    = pad(anos, 2);
-          elDias.textContent    = pad(dias, 3);
+          elAnos.textContent    = pad(anos,  2);
+          elMeses.textContent   = pad(meses, 2);
+          elDias.textContent    = pad(dias,  2);
           elHoras.textContent   = pad(horas, 2);
-          elMinutos.textContent = pad(min, 2);
-          elSeg.textContent     = pad(seg, 2);
+          elMinutos.textContent = pad(min,   2);
+          elSeg.textContent     = pad(seg,   2);
           piscar(elSeg);
         }
       }
