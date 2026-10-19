@@ -1,19 +1,39 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="travado">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
   <!-- ============================================================ -->
   <!--  TÍTULO DA ABA DO NAVEGADOR — EDITE AQUI                    -->
   <!-- ============================================================ -->
-  <title>Para queridinha 💙</title>
-  <link rel="icon" type="image/jpg" href="fotos/favicon.jpg" />
+  <title>Para a minha queridinha 💙</title>
+  <meta name="description" content="Uma surpresa feita com muito amor, só pra você. 💌" />
+  <meta name="theme-color" content="#0a1628" />
+  <link rel="icon" type="image/jpeg" href="fotos/favicon.jpg" />
+  <link rel="apple-touch-icon" href="fotos/apple-touch-icon.png" />
+
+  <!-- ============================================================ -->
+  <!--  PRÉVIA DO LINK NO WHATSAPP — EDITE AQUI                    -->
+  <!--  (a imagem precisa do endereço completo, com https://)      -->
+  <!-- ============================================================ -->
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="pt_BR" />
+  <meta property="og:url" content="https://lopsflex.github.io/" />
+  <meta property="og:title" content="Para a minha queridinha 💙" />
+  <meta property="og:description" content="Tenho uma coisinha pra você... toque para abrir 💌" />
+  <meta property="og:image" content="https://lopsflex.github.io/fotos/og-preview.jpg" />
+  <meta property="og:image:type" content="image/jpeg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="preload" as="image" href="fotos/foto-principal.jpg" fetchpriority="high" />
 
   <!-- Fontes -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Lato:ital,wght@0,300;0,400;0,700;1,300&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet" />
 
   <style>
     /* ============================================================ */
@@ -30,36 +50,48 @@
       --branco-suave:    #f0f6ff;   /* Branco levemente azulado */
       --texto-claro:     #e2eaf7;   /* Texto sobre fundo escuro */
       --texto-suave:     #94b8e8;   /* Texto secundário */
-      --glow-color:      rgba(59, 130, 246, 0.4);
+      --papel:           #fdfcf8;   /* Papel das polaroids e cartas */
+      --tinta:           #1e293b;   /* Texto escrito no papel */
 
       /* Tipografia */
       --font-titulo:  'Playfair Display', Georgia, serif;
       --font-corpo:   'Lato', 'Helvetica Neue', sans-serif;
+      --font-mao:     'Caveat', 'Segoe Print', cursive;   /* letra de mão */
 
-      /* Transições */
-      --transicao-suave: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      /* Movimento */
+      --suave: cubic-bezier(0.16, 1, 0.3, 1);      /* desacelera bem macio */
+      --mola:  cubic-bezier(0.34, 1.56, 0.64, 1);  /* passa um pouquinho e volta */
+      --fator-rot: 1;                               /* inclinação das polaroids */
     }
 
     /* ============================================================ */
     /*  RESET & BASE                                                */
     /* ============================================================ */
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    [hidden] { display: none !important; }
 
     html {
       scroll-behavior: smooth;
+      scrollbar-gutter: stable;
+      touch-action: manipulation;          /* sem zoom acidental com dois toques */
+      -webkit-text-size-adjust: 100%;
     }
+    html.travado, html.travado body { overflow: hidden; }
 
     body {
       font-family: var(--font-corpo);
       background-color: var(--azul-escuro);
       color: var(--texto-claro);
       overflow-x: hidden;
-      cursor: default;
+      overflow-x: clip;
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
     }
+
+    img { display: block; max-width: 100%; }
+    button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+    :focus-visible { outline: 2px solid var(--azul-claro); outline-offset: 4px; border-radius: 8px; }
+    ::selection { background: var(--azul-brilhante); color: var(--branco); }
 
     /* Scrollbar personalizada */
     ::-webkit-scrollbar { width: 6px; }
@@ -67,9 +99,25 @@
     ::-webkit-scrollbar-thumb { background: var(--azul-medio); border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--azul-brilhante); }
 
+    /* overflow-x: clip impede que animações laterais criem rolagem para o lado */
+    section { position: relative; z-index: 1; scroll-margin-top: 16px; overflow-x: clip; }
+
     /* ============================================================ */
-    /*  CANVAS DE PARTÍCULAS (fundo animado)                       */
+    /*  CÉU DE FUNDO (aurora + partículas)                         */
     /* ============================================================ */
+    .aurora {
+      position: fixed;
+      inset: -20%;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(38% 32% at 22% 28%, rgba(37, 99, 235, 0.20), transparent 70%),
+        radial-gradient(34% 30% at 78% 72%, rgba(96, 165, 250, 0.13), transparent 70%),
+        radial-gradient(30% 26% at 60% 10%, rgba(29, 78, 216, 0.12), transparent 70%);
+      animation: aurora 28s ease-in-out infinite alternate;
+    }
+    @keyframes aurora { to { transform: translate3d(6%, -5%, 0) rotate(8deg); } }
+
     #particulas-canvas {
       position: fixed;
       top: 0; left: 0;
@@ -79,220 +127,730 @@
     }
 
     /* ============================================================ */
-    /*  NAVEGAÇÃO FLUTUANTE                                         */
+    /*  ABERTURA — O ENVELOPE                                      */
     /* ============================================================ */
-    nav {
+    #abertura {
+      --ew: min(78vw, 340px, 58vh);         /* largura do envelope */
       position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 100;
-      padding: 1rem 2rem;
+      inset: 0;
+      z-index: 1100;
       display: flex;
+      align-items: center;
       justify-content: center;
-      gap: 2rem;
-      background: linear-gradient(to bottom, rgba(10,22,40,0.9) 0%, transparent 100%);
-      backdrop-filter: blur(2px);
-      transition: var(--transicao-suave);
+      padding: 2rem 1.5rem calc(5rem + env(safe-area-inset-bottom));
+      overflow: hidden;
+      cursor: pointer;
+      touch-action: none;
+      background: #04080f;
+      -webkit-tap-highlight-color: transparent;
     }
-
-    nav a {
-      color: var(--azul-pastel);
-      text-decoration: none;
-      font-family: var(--font-corpo);
-      font-size: 0.8rem;
-      font-weight: 700;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      opacity: 0.7;
-      transition: var(--transicao-suave);
-      position: relative;
-    }
-
-    nav a::after {
+    /* O céu "acende" devagar */
+    #abertura::before {
       content: '';
       position: absolute;
-      bottom: -4px; left: 0;
-      width: 0; height: 1px;
-      background: var(--azul-brilhante);
-      transition: width 0.3s ease;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 45%, #173d73 0%, #0d2244 45%, #060d1a 100%);
+      animation: aparecer 1.8s ease both;
+    }
+    #abertura.portal::before { display: none; }
+
+    /* Estrelinhas */
+    .ab-estrela {
+      position: absolute;
+      width: var(--t); height: var(--t);
+      border-radius: 50%;
+      background: #dbeafe;
+      box-shadow: 0 0 6px rgba(191, 219, 254, 0.8);
+      opacity: 0.2;
+      pointer-events: none;
+      animation: ab-cintilar ease-in-out infinite;
+    }
+    @keyframes ab-cintilar {
+      0%, 100% { opacity: 0.15; transform: scale(0.7); }
+      50%      { opacity: 1;    transform: scale(1.1); }
     }
 
-    nav a:hover { opacity: 1; color: var(--branco); }
-    nav a:hover::after { width: 100%; }
+    /* Coraçõezinhos subindo em três profundidades */
+    .ab-coracao {
+      position: absolute;
+      bottom: -40px;
+      line-height: 1;
+      color: var(--azul-claro);
+      font-family: Arial, sans-serif;
+      pointer-events: none;
+      animation: ab-subir linear infinite;
+    }
+    .ab-coracao.longe { color: #3b82f6; filter: blur(1.5px); }
+    .ab-coracao.perto { color: #93c5fd; text-shadow: 0 0 12px rgba(59, 130, 246, 0.8); }
+    @keyframes ab-subir {
+      0%   { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 0; }
+      12%  { opacity: var(--alfa, 0.3); }
+      50%  { transform: translate3d(var(--x, 0px), -55vh, 0) rotate(15deg); }
+      85%  { opacity: var(--alfa, 0.3); }
+      100% { transform: translate3d(0, -115vh, 0) rotate(30deg); opacity: 0; }
+    }
 
-    /* ============================================================ */
-    /*  SEÇÃO HERO (TELA INICIAL)                                  */
-    /* ============================================================ */
-    #hero {
+    .ab-conteudo {
       position: relative;
-      width: 100%;
-      height: 100vh;
-      min-height: 600px;
+      z-index: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      gap: clamp(1.8rem, 6vh, 3rem);
+    }
+
+    .abertura-texto {
+      font-family: var(--font-titulo);
+      font-size: clamp(1.45rem, 6vw, 2.2rem);
+      line-height: 1.3;
+      color: var(--branco);
       text-align: center;
-      overflow: hidden;
+      text-shadow: 0 0 40px rgba(59, 130, 246, 0.5);
+    }
+    .abertura-texto em { color: var(--azul-claro); }
+    .ab-linha { display: block; }
+    .ab-palavra { display: inline-block; opacity: 0; animation: palavra-entra 1s calc(0.5s + var(--i) * 120ms) var(--suave) both; }
+
+    /* O envelope cai do alto como uma folha e assenta */
+    .envelope-cena {
+      width: var(--ew);
+      aspect-ratio: 3 / 2;
+      perspective: 900px;
+      animation: env-cair 1.7s 1s both;
+    }
+    @keyframes env-cair {
+      0%   { transform: translateY(-75vh) rotate(-16deg); opacity: 0; animation-timing-function: cubic-bezier(0.3, 0.1, 0.5, 1); }
+      15%  { opacity: 1; }
+      55%  { transform: translateY(14px) rotate(4deg);    animation-timing-function: ease-in-out; }
+      75%  { transform: translateY(-6px) rotate(-1.5deg); animation-timing-function: ease-in-out; }
+      90%  { transform: translateY(2px) rotate(0.5deg); }
+      100% { transform: none; opacity: 1; }
+    }
+    .envelope-inclina {
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s var(--suave);
+    }
+    /* Depois de assentar, fica "respirando" */
+    .envelope {
+      position: relative;
+      display: block;
+      width: 100%;
+      height: 100%;
+      perspective: 900px;
+      animation: env-respira 4.2s 2.7s ease-in-out infinite;
+    }
+    @keyframes env-respira {
+      0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+      50%      { transform: translateY(-9px) rotate(-1.2deg) scale(1.015); }
+    }
+
+    .env-luz, .env-fundo, .env-carta, .env-frente, .env-aba, .env-selo { position: absolute; display: block; }
+
+    /* Luz que vaza de dentro quando a aba abre */
+    .env-luz {
+      left: 50%; top: 4%;
       z-index: 1;
+      width: 170%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(219, 234, 254, 0.95) 0%, rgba(147, 197, 253, 0.55) 18%, rgba(59, 130, 246, 0.18) 42%, transparent 65%);
+      transform: translate(-50%, -50%) scale(0.3);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .env-luz::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: repeating-conic-gradient(from 0deg, rgba(191, 219, 254, 0.25) 0deg 6deg, transparent 6deg 18deg);
+      -webkit-mask: radial-gradient(circle, #000 12%, transparent 62%);
+      mask: radial-gradient(circle, #000 12%, transparent 62%);
+      animation: girar 16s linear infinite;
+    }
+
+    .env-fundo {
+      inset: 0;
+      z-index: 0;
+      border-radius: 12px;
+      background: linear-gradient(160deg, #1e4f91, #133463);
+      box-shadow: 0 30px 70px rgba(0, 0, 0, 0.55), 0 0 70px rgba(59, 130, 246, 0.25);
+    }
+
+    .env-carta {
+      left: 7%; right: 7%; top: 6%;
+      height: 88%;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.35em;
+      padding-top: 13%;
+      border-radius: 8px;
+      overflow: hidden;
+      background:
+        repeating-linear-gradient(to bottom, transparent 0 26px, rgba(59, 130, 246, 0.12) 26px 27px),
+        var(--papel);
+      box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.18);
+      font-family: var(--font-mao);
+      text-align: center;
+    }
+    .carta-tinta {
+      position: absolute;
+      inset: 0;
+      background: #dbeafe;
+      opacity: 0;
+    }
+    .carta-l1, .carta-l2 {
+      position: relative;
+      white-space: nowrap;
+      padding: 0 0.1em;
+      clip-path: inset(0 100% 0 0);   /* escrito da esquerda para a direita */
+    }
+    .carta-l1 { font-size: calc(var(--ew) * 0.072); font-weight: 700; color: #1d4ed8; }
+    .carta-l2 { font-size: calc(var(--ew) * 0.05);  font-weight: 500; color: #334155; }
+
+    .env-frente {
+      inset: 0;
+      z-index: 3;
+      overflow: hidden;
+      border-radius: 12px;
+      background: linear-gradient(25deg, #2459a3, #1a4a8a 55%, #2a63b3);
+      clip-path: polygon(0 0, 50% 54%, 100% 0, 100% 100%, 0 100%);
+    }
+    /* Faixa de luz que passa pelo papel */
+    .env-brilho {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.28) 50%, transparent 65%);
+      transform: translateX(-120%);
+      animation: env-brilho 3.4s 3s ease-in-out infinite;
+    }
+    @keyframes env-brilho {
+      0%        { transform: translateX(-120%); }
+      45%, 100% { transform: translateX(120%); }
+    }
+
+    .env-aba {
+      left: 0; right: 0; top: 0;
+      height: 60%;
+      z-index: 4;
+      border-radius: 12px 12px 0 0;
+      background: linear-gradient(180deg, #3170c4, #1d4f94);
+      clip-path: polygon(0 0, 100% 0, 50% 100%);
+      transform-origin: top center;
+    }
+
+    /* O selo (duas metades, que se partem ao tocar) */
+    .env-selo {
+      left: 50%; top: 60%;
+      z-index: 5;
+      width: clamp(46px, calc(var(--ew) * 0.17), 62px);
+      aspect-ratio: 1;
+      transform: translate(-50%, -50%);
+      animation: selo-bate 1.6s ease-in-out infinite;
+    }
+    @keyframes selo-bate {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); }
+      50%      { transform: translate(-50%, -50%) scale(1.12); }
+    }
+    /* Onda de luz que chama para o toque */
+    .env-selo::after {
+      content: '';
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      border: 2px solid rgba(147, 197, 253, 0.85);
+      opacity: 0;
+      animation: selo-onda 1.9s 2.8s ease-out infinite;
+      pointer-events: none;
+    }
+    @keyframes selo-onda {
+      0%   { transform: scale(1);   opacity: 0.9; }
+      100% { transform: scale(2.4); opacity: 0; }
+    }
+    #abertura.abrindo .env-selo::after { animation: none; opacity: 0; }
+    .selo-sombra {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45), 0 0 0 5px rgba(96, 165, 250, 0.18);
+    }
+    .selo-metade {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      font-family: Arial, sans-serif;
+      font-size: calc(var(--ew) * 0.075);
+      color: var(--branco);
+      background: radial-gradient(circle at 35% 30%, #60a5fa, #1d4ed8 65%, #1e3a8a);
+      box-shadow: inset 0 -3px 6px rgba(0, 0, 0, 0.25);
+    }
+    .selo-metade.esq { clip-path: inset(0 50% 0 0); }
+    .selo-metade.dir { clip-path: inset(0 0 0 50%); }
+
+    /* "Toque para abrir" com o dedinho */
+    .abertura-dica {
+      position: absolute;
+      left: 0; right: 0;
+      bottom: calc(6vh + env(safe-area-inset-bottom));
+      z-index: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: var(--texto-suave);
+      animation: fade-up 1s 2.7s var(--suave) both;
+    }
+    .abertura-dica .dedo { font-size: 1.3rem; letter-spacing: 0; animation: dedo-toca 1.6s 3s ease-in-out infinite; }
+    .abertura-dica .texto { animation: dica-pulsa 2s 3.5s ease-in-out infinite; }
+    @keyframes dedo-toca {
+      0%, 100% { transform: translateY(0) scale(1); }
+      30%      { transform: translateY(-6px) scale(1.05); }
+      45%      { transform: translateY(2px) scale(0.9); }
+      60%      { transform: translateY(0) scale(1); }
+    }
+    @keyframes dica-pulsa {
+      0%, 100% { opacity: 1; }
+      50%      { opacity: 0.35; }
+    }
+    @keyframes selo-pulsa {
+      0%, 100% { transform: scale(1); }
+      50%      { transform: scale(1.12); }
+    }
+
+    @media (min-width: 900px) {
+      #abertura { --ew: min(380px, 50vh); }
+    }
+    /* Celular deitado: frase e envelope lado a lado */
+    @media (max-height: 520px) and (orientation: landscape) {
+      #abertura { --ew: min(42vw, 300px, 62vh); padding-bottom: 3.5rem; }
+      .ab-conteudo { flex-direction: row; gap: 3rem; }
+      .abertura-texto { text-align: left; }
+      .abertura-dica { bottom: 1rem; }
     }
 
     /* ============================================================ */
-    /*  FOTO DE FUNDO DO HERO — EDITE O src= ABAIXO                */
-    /* ============================================================ -->
-    <!-- (use uma URL pública ou caminho relativo da foto de vocês)  */
+    /*  BARRA DE PROGRESSO + NAVEGAÇÃO                             */
     /* ============================================================ */
-    #hero-foto {
+    #progresso {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      z-index: 110;
+      pointer-events: none;
+    }
+    #progresso .barra {
       position: absolute;
       inset: 0;
+      background: linear-gradient(90deg, #1d4ed8, var(--azul-claro), var(--azul-pastel));
+      box-shadow: 0 0 10px rgba(96, 165, 250, 0.7);
+      transform: translateX(-100%);
+      will-change: transform;
+    }
+    #progresso .barra::after {
+      content: '♥';
+      position: absolute;
+      right: -5px; top: 50%;
+      transform: translateY(-50%);
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      color: var(--azul-pastel);
+      text-shadow: 0 0 8px var(--azul-brilhante);
+    }
+
+    #menu {
+      position: fixed;
+      left: 50%;
+      bottom: calc(12px + env(safe-area-inset-bottom));
+      z-index: 100;
+      display: flex;
+      gap: 2px;
+      width: max-content;
+      max-width: calc(100% - 20px);
+      padding: 6px;
+      border-radius: 999px;
+      background: rgba(10, 22, 40, 0.8);
+      border: 1px solid rgba(96, 165, 250, 0.22);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(14px) saturate(1.3);
+      -webkit-backdrop-filter: blur(14px) saturate(1.3);
+      transform: translate(-50%, 0);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.5s var(--suave), opacity 0.4s ease;
+    }
+    body.aberto #menu { opacity: 1; pointer-events: auto; }
+    #menu.escondido { transform: translate(-50%, calc(100% + 30px)); }
+
+    #menu a {
+      flex: 1 1 0;
+      min-width: 50px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 7px 6px 6px;
+      border-radius: 999px;
+      color: var(--texto-suave);
+      text-decoration: none;
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    #menu a .ico { font-size: 1.15rem; line-height: 1; transition: transform 0.4s var(--mola); }
+    #menu a.ativo { background: rgba(59, 130, 246, 0.24); color: var(--branco); }
+    #menu a.ativo .ico { transform: translateY(-2px) scale(1.15); }
+
+    @media (min-width: 900px) {
+      section { scroll-margin-top: 76px; }
+      #menu { top: 16px; bottom: auto; }
+      #menu.escondido { transform: translate(-50%, calc(-100% - 30px)); }
+      #menu a {
+        flex-direction: row;
+        gap: 7px;
+        padding: 9px 15px;
+        font-size: 0.72rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+      #menu a .ico { font-size: 0.95rem; }
+      #menu a:hover { color: var(--branco); background: rgba(59, 130, 246, 0.12); }
+    }
+
+    /* ============================================================ */
+    /*  SEÇÃO HERO — A FOTO DENTRO DO CORAÇÃO                      */
+    /* ============================================================ */
+    #hero {
+      --tam: min(74vw, 42vh, 380px);       /* tamanho do coração */
+      min-height: 100vh;
+      min-height: 100svh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4.5rem 1.25rem 6.5rem;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    /* Fundo: a mesma foto, bem desfocada e escura */
+    .hero-fundo {
+      position: absolute;
+      inset: -8%;
+      z-index: 0;
+      opacity: 0;
+      transition: opacity 2.5s ease 0.3s;
+    }
+    body.aberto .hero-fundo { opacity: 0.5; }
+    .hero-fundo img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      object-position: center;
-      z-index: 0;
-      filter: brightness(0.55) saturate(0.8);
-      transform: scale(1.05);
-      animation: hero-zoom 20s ease-in-out infinite alternate;
+      filter: blur(38px) brightness(0.45) saturate(1.3);
+      transform: scale(1.1);
     }
-
-    @keyframes hero-zoom {
-      from { transform: scale(1.05); }
-      to   { transform: scale(1.12); }
-    }
-
-    /* Overlay azulado sobre a foto */
     #hero::before {
       content: '';
       position: absolute;
       inset: 0;
-      background: linear-gradient(
-        160deg,
-        rgba(10, 22, 40, 0.55) 0%,
-        rgba(15, 41, 82, 0.45) 50%,
-        rgba(10, 22, 40, 0.75) 100%
-      );
       z-index: 1;
+      background: radial-gradient(ellipse at 50% 38%, rgba(10, 22, 40, 0.1), rgba(10, 22, 40, 0.88) 75%);
     }
-
-    /* Overlay de gradiente na borda inferior para transição suave */
     #hero::after {
       content: '';
       position: absolute;
       bottom: 0; left: 0; right: 0;
+      z-index: 2;
       height: 180px;
       background: linear-gradient(to top, var(--azul-escuro), transparent);
-      z-index: 2;
     }
 
-    .hero-conteudo {
+    .hero-palco {
       position: relative;
       z-index: 3;
-      padding: 0 1.5rem;
-      max-width: 700px;
-      animation: hero-entrada 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      opacity: 0;
+      width: 100%;
+      max-width: 1100px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(1.6rem, 4vh, 2.6rem);
     }
 
-    @keyframes hero-entrada {
-      from { opacity: 0; transform: translateY(40px); }
-      to   { opacity: 1; transform: translateY(0); }
+    /* ---------- O coração ---------- */
+    .hero-coracao {
+      position: relative;
+      flex: none;
+      width: var(--tam);
+      aspect-ratio: 100 / 90;
+      perspective: 900px;
+      cursor: pointer;
+      touch-action: manipulation;
+      will-change: transform;
     }
+
+    .coracao-aura {
+      position: absolute;
+      inset: -35%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.45) 0%, rgba(37, 99, 235, 0.15) 40%, transparent 68%);
+      opacity: 0;
+      pointer-events: none;
+    }
+    body.aberto .coracao-aura { animation: aparecer 1.5s 1s ease both, aura-pulsa 4s 2.5s ease-in-out infinite; }
+    @keyframes aparecer { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes aura-pulsa {
+      0%, 100% { opacity: 1;    transform: scale(1); }
+      50%      { opacity: 0.65; transform: scale(1.08); }
+    }
+
+    /* Coraçõezinhos em órbita */
+    .coracao-orbita {
+      position: absolute;
+      left: 50%; top: 50%;
+      width: 0; height: 0;
+      opacity: 0;
+      transition: opacity 1.5s ease 2.2s;
+      animation: girar 24s linear infinite;
+      pointer-events: none;
+    }
+    body.aberto .coracao-orbita { opacity: 1; }
+    @keyframes girar { to { transform: rotate(360deg); } }
+    .coracao-orbita span {
+      position: absolute;
+      left: 0; top: 0;
+      margin: -0.5em 0 0 -0.4em;
+      font-family: Arial, sans-serif;
+      font-size: calc(var(--tam) * 0.06);
+      line-height: 1;
+      color: var(--azul-claro);
+      text-shadow: 0 0 10px rgba(59, 130, 246, 0.9);
+      transform: rotate(calc(var(--i) * 45deg)) translateY(calc(var(--tam) * -0.64)) rotate(calc(var(--i) * -45deg));
+    }
+    /* Gira ao contrário da órbita para o coraçãozinho ficar sempre em pé */
+    .coracao-orbita span i {
+      display: block;
+      font-style: normal;
+      animation: girar 24s linear infinite reverse, piscar-coracao 2.4s ease-in-out infinite;
+      animation-delay: 0s, calc(var(--i) * -0.3s);
+    }
+    @keyframes piscar-coracao {
+      0%, 100% { opacity: 0.35; }
+      50%      { opacity: 1; }
+    }
+
+    .coracao-inclina {
+      position: absolute;
+      inset: 0;
+      transform-style: preserve-3d;
+      transition: transform 0.5s var(--suave);
+    }
+
+    /* Começa como um coraçãozinho batendo e cresce até virar a janela da foto */
+    .coracao-bate { position: absolute; inset: 0; opacity: 0; transform: scale(0.12); }
+    body.aberto .coracao-bate { animation: coracao-nasce 2.1s 0.15s both, coracao-batida 2.4s 2.5s ease-in-out infinite; }
+    @keyframes coracao-nasce {
+      0%   { transform: scale(0.12); opacity: 0; animation-timing-function: ease-out; }
+      10%  { transform: scale(0.17); opacity: 1; animation-timing-function: ease-in; }
+      18%  { transform: scale(0.13); animation-timing-function: ease-out; }
+      26%  { transform: scale(0.19); animation-timing-function: ease-in; }
+      36%  { transform: scale(0.14); animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1); }
+      100% { transform: scale(1);    opacity: 1; }
+    }
+    @keyframes coracao-batida {
+      0%, 40%, 100% { transform: scale(1); }
+      10%           { transform: scale(1.035); }
+      20%           { transform: scale(1); }
+      30%           { transform: scale(1.025); }
+    }
+
+    .coracao-janela {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      background: var(--azul-marino);
+      -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 90'%3E%3Cpath d='M50 88C20 66 2 48 2 28 2 12 14 2 28 2c10 0 18 6 22 14C54 8 62 2 72 2c14 0 26 10 26 26 0 20-18 38-48 60z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 90'%3E%3Cpath d='M50 88C20 66 2 48 2 28 2 12 14 2 28 2c10 0 18 6 22 14C54 8 62 2 72 2c14 0 26 10 26 26 0 20-18 38-48 60z'/%3E%3C/svg%3E") center / 100% 100% no-repeat;
+    }
+    .coracao-janela img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: 50% 35%;
+    }
+    /* Enquanto pequeno, o coração é só luz azul; depois a foto aparece */
+    .coracao-janela::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 35% 30%, #93c5fd, #3b82f6 45%, #1d4ed8);
+    }
+    body.aberto .coracao-janela::after { animation: sumir 1.1s 0.95s ease both; }
+    @keyframes sumir { to { opacity: 0; } }
+
+    /* Contorno brilhante que é desenhado em volta */
+    .coracao-contorno {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      pointer-events: none;
+      filter: drop-shadow(0 0 6px rgba(96, 165, 250, 0.9)) drop-shadow(0 0 18px rgba(59, 130, 246, 0.6));
+    }
+    .coracao-contorno path {
+      fill: none;
+      stroke: #dbeafe;
+      stroke-width: 1.3;
+      stroke-linecap: round;
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+    }
+    body.aberto .coracao-contorno path { animation: desenhar 1.8s 1.3s cubic-bezier(0.65, 0, 0.35, 1) forwards; }
+    @keyframes desenhar { to { stroke-dashoffset: 0; } }
+
+    /* ---------- O texto ---------- */
+    .hero-conteudo { position: relative; max-width: 620px; }
 
     .hero-subtitulo {
-      font-family: var(--font-corpo);
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 700;
       letter-spacing: 0.3em;
       text-transform: uppercase;
       color: var(--azul-claro);
-      margin-bottom: 1rem;
+      margin-bottom: 0.9rem;
       opacity: 0;
-      animation: fade-up 0.8s 0.5s forwards;
     }
 
-    /* ============================================================ */
-    /*  NOME/TÍTULO PRINCIPAL DO HERO — EDITE ABAIXO              */
-    /* ============================================================ */
     .hero-titulo {
       font-family: var(--font-titulo);
-      font-size: clamp(2.8rem, 8vw, 5.5rem);
-      font-weight: 700;
+      font-weight: 600;
       line-height: 1.1;
       color: var(--branco);
-      margin-bottom: 1.5rem;
-      text-shadow: 0 0 60px rgba(59, 130, 246, 0.4);
-      opacity: 0;
-      animation: fade-up 0.9s 0.7s forwards;
+      margin-bottom: 1.3rem;
+      text-shadow: 0 0 40px rgba(59, 130, 246, 0.4);
     }
+    .hero-titulo .linha { display: block; font-size: clamp(1.5rem, 5.6vw, 2.6rem); }
+    .hero-titulo .palavra { display: inline-block; opacity: 0; }
 
-    .hero-titulo em {
-      font-style: italic;
-      color: var(--azul-claro);
+    /* "queridinha," escrito à mão, da esquerda para a direita */
+    .hero-nome {
+      display: block;
+      width: fit-content;
+      margin: -0.04em auto -0.02em;
+      padding: 0.05em 0.14em 0.14em;
+      font-family: var(--font-mao);
+      font-weight: 700;
+      font-size: clamp(3.4rem, 16vw, 6.8rem);
+      line-height: 1;
+      text-shadow: none;
+      background: linear-gradient(100deg, #93c5fd 15%, #ffffff 40%, #60a5fa 60%, #bfdbfe 85%);
+      background-size: 250% 100%;
+      background-position: 100% 0;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+      filter: drop-shadow(0 0 20px rgba(59, 130, 246, 0.5));
+      clip-path: inset(0 100% 0 0);
     }
 
     .hero-frase {
-      font-size: clamp(0.95rem, 2.5vw, 1.1rem);
+      font-size: clamp(0.98rem, 2.6vw, 1.1rem);
       font-weight: 300;
-      color: var(--texto-suave);
-      line-height: 1.7;
+      line-height: 1.75;
+      color: var(--texto-claro);
       max-width: 480px;
-      margin: 0 auto 2.5rem;
+      margin: 0 auto 2rem;
       opacity: 0;
-      animation: fade-up 0.9s 0.9s forwards;
     }
 
-    .hero-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.6rem;
-      padding: 0.9rem 2.2rem;
-      border-radius: 50px;
-      border: 1.5px solid var(--azul-brilhante);
-      background: rgba(59, 130, 246, 0.12);
-      color: var(--branco);
-      font-family: var(--font-corpo);
-      font-size: 0.9rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-decoration: none;
-      cursor: pointer;
-      transition: var(--transicao-suave);
-      backdrop-filter: blur(8px);
-      box-shadow: 0 0 25px rgba(59, 130, 246, 0.2);
-      opacity: 0;
-      animation: fade-up 0.9s 1.1s forwards;
-    }
-
-    .hero-btn:hover {
-      background: rgba(59, 130, 246, 0.3);
-      box-shadow: 0 0 40px rgba(59, 130, 246, 0.4);
-      transform: translateY(-3px);
-    }
-
-    .hero-btn .seta {
-      font-size: 1.2rem;
-      animation: bounce-seta 1.5s ease-in-out infinite;
-    }
-
+    .hero-btn { opacity: 0; }
+    .hero-btn .seta { font-size: 1.2rem; animation: bounce-seta 1.5s ease-in-out infinite; }
     @keyframes bounce-seta {
       0%, 100% { transform: translateY(0); }
-      50%       { transform: translateY(5px); }
+      50%      { transform: translateY(5px); }
+    }
+
+    /* A ordem da entrada (começa quando o envelope abre) */
+    body.aberto .hero-subtitulo         { animation: fade-up 0.9s 1.1s var(--suave) both; }
+    body.aberto .linha-a .palavra       { animation: palavra-entra 0.9s calc(1.4s + var(--i) * 110ms) var(--suave) both; }
+    body.aberto .hero-nome              { animation: escrever 1.4s 1.8s cubic-bezier(0.65, 0, 0.35, 1) forwards, brilho-texto 5s 3.4s linear infinite; }
+    body.aberto .linha-b .palavra       { animation: palavra-entra 0.9s calc(2.7s + var(--i) * 110ms) var(--suave) both; }
+    body.aberto .hero-frase             { animation: fade-up 1s 3.1s var(--suave) both; }
+    body.aberto .hero-btn               { animation: fade-up 1s 3.4s var(--suave) both; }
+
+    @keyframes escrever { to { clip-path: inset(0 0 0 0); } }
+    @keyframes palavra-entra {
+      from { opacity: 0; transform: translateY(0.5em) rotate(3deg); filter: blur(8px); }
+      to   { opacity: 1; transform: none; filter: blur(0); }
+    }
+    @keyframes brilho-texto {
+      from { background-position: 100% 0; }
+      to   { background-position: -150% 0; }
+    }
+
+    @media (min-width: 900px) {
+      #hero { --tam: min(40vw, 62vh, 520px); padding: 5rem 3rem; }
+      .hero-palco { flex-direction: row; justify-content: center; gap: clamp(3rem, 6vw, 6rem); }
+      .hero-conteudo { flex: 0 1 520px; text-align: left; }
+      .hero-titulo .linha { font-size: clamp(2rem, 3.2vw, 2.8rem); }
+      .hero-nome { margin-left: -0.12em; font-size: clamp(5rem, 8vw, 7.5rem); }
+      .hero-frase { margin-left: 0; }
+    }
+    /* Celular deitado */
+    @media (max-height: 520px) and (orientation: landscape) {
+      #hero { --tam: min(36vw, 70vh); padding: 3.5rem 2rem; }
+      .hero-palco { flex-direction: row; justify-content: center; gap: 2.5rem; }
+      .hero-conteudo { text-align: left; }
+      .hero-nome { margin-left: -0.12em; font-size: 3.6rem; }
+      .hero-frase { margin-left: 0; }
     }
 
     /* ============================================================ */
-    /*  CONTADOR DE TEMPO                                           */
+    /*  BOTÕES                                                      */
     /* ============================================================ */
-    #contador {
-      position: relative;
-      z-index: 1;
-      padding: 5rem 1.5rem;
-      text-align: center;
-      background: linear-gradient(135deg, rgba(15,41,82,0.6) 0%, rgba(10,22,40,0.8) 100%);
-      border-top: 1px solid rgba(59,130,246,0.15);
-      border-bottom: 1px solid rgba(59,130,246,0.15);
+    .botao {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      padding: 0.9rem 2.1rem;
+      border-radius: 999px;
+      border: 1.5px solid var(--azul-brilhante);
+      background: rgba(59, 130, 246, 0.14);
+      color: var(--branco);
+      font-family: var(--font-corpo);
+      font-size: 0.92rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-decoration: none;
+      white-space: nowrap;
+      cursor: pointer;
+      box-shadow: 0 0 25px rgba(59, 130, 246, 0.2);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: transform 0.35s var(--mola), background 0.3s ease, box-shadow 0.3s ease;
+      -webkit-user-select: none;
+      user-select: none;
     }
+    .botao:hover  { background: rgba(59, 130, 246, 0.3); box-shadow: 0 0 40px rgba(59, 130, 246, 0.4); transform: translateY(-3px); }
+    .botao:active { transform: scale(0.95); }
+
+    /* ============================================================ */
+    /*  CABEÇALHOS DAS SEÇÕES                                       */
+    /* ============================================================ */
+    .secao-cabecalho { text-align: center; margin-bottom: 3rem; }
 
     .secao-rotulo {
-      font-family: var(--font-corpo);
       font-size: 0.7rem;
       font-weight: 700;
       letter-spacing: 0.35em;
@@ -303,347 +861,1064 @@
 
     .secao-titulo {
       font-family: var(--font-titulo);
-      font-size: clamp(1.9rem, 5vw, 3rem);
+      font-size: clamp(1.9rem, 5.5vw, 3rem);
       font-weight: 600;
-      color: var(--branco);
-      margin-bottom: 3rem;
       line-height: 1.2;
-    }
-
-    .secao-titulo em {
-      font-style: italic;
-      color: var(--azul-claro);
-    }
-
-    .contador-grid {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 1.2rem;
-    }
-
-    .contador-linha {
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      gap: clamp(0.6rem, 2.5vw, 2rem);
-      flex-wrap: nowrap;
-    }
-
-    .contador-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.5rem;
-      position: relative;
-    }
-
-    .contador-numero {
-      font-family: var(--font-titulo);
-      font-size: clamp(2.5rem, 8vw, 5rem);
-      font-weight: 700;
-      line-height: 1;
       color: var(--branco);
-      min-width: clamp(70px, 15vw, 110px);
+      margin-bottom: 1rem;
+    }
+    .secao-titulo em { font-style: italic; color: var(--azul-claro); }
+
+    .secao-dica {
+      font-family: var(--font-mao);
+      font-size: 1.2rem;
+      color: var(--texto-suave);
+    }
+
+    /* ============================================================ */
+    /*  CONTADOR DE TEMPO — RELÓGIO FLIP                           */
+    /* ============================================================ */
+    #contador {
+      padding: 5.5rem 1.25rem;
       text-align: center;
-      padding: 0.6rem 1rem 0.8rem;
-      border-radius: 16px;
-      background: rgba(26, 74, 138, 0.25);
-      border: 1px solid rgba(59, 130, 246, 0.3);
-      backdrop-filter: blur(10px);
+      background: linear-gradient(135deg, rgba(15, 41, 82, 0.6) 0%, rgba(10, 22, 40, 0.8) 100%);
+      border-top: 1px solid rgba(59, 130, 246, 0.15);
+      border-bottom: 1px solid rgba(59, 130, 246, 0.15);
+    }
+    #contador .secao-titulo { margin-bottom: 3rem; }
+
+    .flip-relogio {
+      --fw: min(25vw, 96px);               /* largura de cada plaquinha */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.6rem;
+    }
+    .flip-grupo { display: flex; gap: clamp(0.6rem, 3vw, 1rem); }
+    .flip-sep { display: none; }
+    .flip-item { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; }
+
+    .flip {
+      position: relative;
+      width: var(--fw);
+      height: calc(var(--fw) * 1.12);
+      perspective: 500px;
+      border-radius: 12px;
+      font-family: var(--font-titulo);
+      font-weight: 700;
+      font-size: calc(var(--fw) * 0.56);
+      font-variant-numeric: lining-nums tabular-nums;
+      color: #f8fbff;
       box-shadow:
-        0 0 30px rgba(59, 130, 246, 0.15),
-        inset 0 1px 0 rgba(255,255,255,0.08);
-      animation: numero-pulse 3s ease-in-out infinite;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
+        0 18px 35px rgba(0, 0, 0, 0.45),
+        0 4px 10px rgba(0, 0, 0, 0.35),
+        0 0 0 1px rgba(96, 165, 250, 0.25),
+        0 0 30px rgba(59, 130, 246, 0.15);
+    }
+    /* O vinco do meio */
+    .flip::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0; top: 50%;
+      z-index: 6;
+      height: 2px;
+      margin-top: -1px;
+      background: linear-gradient(90deg, rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.65));
+    }
+    /* Os pininhos das laterais */
+    .flip::before {
+      content: '';
+      position: absolute;
+      left: -3px; right: -3px; top: 50%;
+      z-index: 7;
+      height: 8px;
+      margin-top: -4px;
+      background:
+        radial-gradient(circle at 3px 4px, var(--azul-claro) 2px, transparent 2.5px),
+        radial-gradient(circle at calc(100% - 3px) 4px, var(--azul-claro) 2px, transparent 2.5px);
     }
 
-    .contador-numero.atualizado {
-      transform: scale(1.08);
-      box-shadow: 0 0 45px rgba(59, 130, 246, 0.5);
+    .flip-metade, .flip-aba {
+      position: absolute;
+      left: 0; right: 0;
+      height: 50%;
+      overflow: hidden;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
     }
-
-    @keyframes numero-pulse {
-      0%, 100% { box-shadow: 0 0 30px rgba(59,130,246,0.15), inset 0 1px 0 rgba(255,255,255,0.08); }
-      50%       { box-shadow: 0 0 50px rgba(59,130,246,0.30), inset 0 1px 0 rgba(255,255,255,0.08); }
+    .flip-metade.cima, .flip-aba.frente {
+      top: 0;
+      border-radius: 12px 12px 0 0;
+      background: linear-gradient(180deg, #24508f 0%, #173a6d 100%);
     }
+    .flip-metade.baixo, .flip-aba.tras {
+      bottom: 0;
+      border-radius: 0 0 12px 12px;
+      background: linear-gradient(180deg, #12305c 0%, #0d2448 100%);
+    }
+    /* Reflexo de vidro na metade de cima */
+    .flip-metade.cima::after, .flip-aba.frente::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.13), transparent 65%);
+    }
+    .flip-metade span, .flip-aba span {
+      position: absolute;
+      left: 0; right: 0;
+      height: 200%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+    .cima span, .frente span { top: 0; }
+    .baixo span, .tras span  { bottom: 0; }
+    .flip-aba { z-index: 3; }
+    .flip-aba.frente { transform-origin: 50% 100%; }
+    .flip-aba.tras   { transform-origin: 50% 0; transform: rotateX(90deg); }
 
     .contador-label {
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       font-weight: 700;
       letter-spacing: 0.2em;
       text-transform: uppercase;
       color: var(--texto-suave);
     }
 
-    .contador-separador {
-      font-family: var(--font-titulo);
-      font-size: 3rem;
-      color: var(--azul-medio);
+    .contador-total {
+      margin-top: 2.6rem;
+      font-family: var(--font-mao);
+      font-size: clamp(1.35rem, 4.5vw, 1.7rem);
+      color: var(--texto-claro);
+    }
+    .contador-total strong { color: var(--azul-claro); font-size: 1.15em; }
+
+    /* Barrinha até o próximo aniversário de namoro */
+    .aniversario { max-width: 440px; margin: 2rem auto 0; padding: 0 0.5rem; }
+    .aniv-texto { margin-bottom: 1rem; font-size: 0.95rem; font-weight: 300; color: var(--texto-claro); }
+    .aniv-texto strong { color: var(--azul-claro); font-weight: 700; }
+    .aniv-barra {
+      position: relative;
+      height: 8px;
+      border-radius: 99px;
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(96, 165, 250, 0.2);
+    }
+    .aniv-preenchido {
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #1d4ed8, var(--azul-claro), var(--azul-pastel));
+      box-shadow: 0 0 14px rgba(96, 165, 250, 0.6);
+      transition: width 2.2s var(--suave) 0.4s;
+    }
+    .aniv-coracao {
+      position: absolute;
+      top: 50%; left: 0;
+      margin: -0.55em 0 0 -0.45em;
+      font-family: Arial, sans-serif;
+      font-size: 1.15rem;
       line-height: 1;
-      align-self: flex-start;
-      padding-top: 0.5rem;
+      color: var(--branco);
+      text-shadow: 0 0 10px var(--azul-brilhante);
+      transition: left 2.2s var(--suave) 0.4s;
+    }
+    .aniv-coracao i { display: block; font-style: normal; animation: selo-pulsa 1.6s ease-in-out infinite; }
+    .aniv-pontas {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.6rem;
+      font-size: 0.64rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--texto-suave);
+    }
+
+    @media (min-width: 700px) {
+      .flip-relogio {
+        --fw: min(9.5vw, 104px);
+        flex-direction: row;
+        justify-content: center;
+        align-items: flex-start;
+        gap: clamp(0.8rem, 2vw, 1.6rem);
+      }
+      .flip-sep {
+        display: block;
+        margin-top: calc(var(--fw) * 0.2);
+        font-family: var(--font-titulo);
+        font-size: calc(var(--fw) * 0.5);
+        line-height: 1;
+        color: var(--azul-claro);
+        animation: dica-pulsa 2s ease-in-out infinite;
+      }
     }
 
     /* ============================================================ */
-    /*  MURAL DE MEMÓRIAS (FOTOS)                                  */
+    /*  LINHA DO TEMPO                                              */
     /* ============================================================ */
-    #memorias {
-      position: relative;
-      z-index: 1;
-      padding: 5rem 1.5rem;
-      max-width: 1200px;
+    #historia {
+      max-width: 1000px;
       margin: 0 auto;
+      padding: 5.5rem 1.25rem 3rem;
     }
 
-    .secao-cabecalho {
-      text-align: center;
-      margin-bottom: 3rem;
-    }
+    .timeline { position: relative; padding: 0.5rem 0; }
 
-    /* Grade de fotos — Desktop: 3 colunas | Mobile: scroll horizontal */
-    .memorias-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.2rem;
-    }
-
-    .foto-card {
-      position: relative;
-      border-radius: 16px;
+    .timeline-trilho {
+      position: absolute;
+      top: 0; bottom: 0;
+      left: 21px;
+      width: 2px;
+      border-radius: 2px;
+      background: rgba(59, 130, 246, 0.15);
       overflow: hidden;
-      aspect-ratio: 3 / 4;
-      cursor: pointer;
-      background: var(--azul-marino);
-      border: 1px solid rgba(59, 130, 246, 0.15);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-      transition: transform var(--transicao-suave), box-shadow var(--transicao-suave);
+    }
+    .timeline-progresso {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, var(--azul-claro), var(--azul-brilhante), var(--azul-pastel));
+      transform: scaleY(0);
+      transform-origin: top;
+      will-change: transform;
+    }
+    /* Pontinho brilhante que "desenha" a linha */
+    .timeline-cabeca {
+      position: absolute;
+      top: 0;
+      left: 22px;
+      width: 12px; height: 12px;
+      margin: -6px 0 0 -6px;
+      border-radius: 50%;
+      background: var(--branco);
+      box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.35), 0 0 22px 6px rgba(59, 130, 246, 0.8);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      will-change: transform;
+      pointer-events: none;
     }
 
-    .foto-card:hover {
-      transform: translateY(-8px) scale(1.02);
-      box-shadow: 0 20px 60px rgba(59,130,246,0.25), 0 0 0 1px rgba(59,130,246,0.4);
-    }
+    .marco { position: relative; padding-left: 58px; margin-bottom: 2.4rem; }
+    .marco:last-child { margin-bottom: 0; }
 
-    .foto-card:hover .foto-overlay {
+    .marco-ponto {
+      position: absolute;
+      top: 16px;
+      left: 22px;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 1rem;
+      background: var(--azul-escuro);
+      border: 2px solid rgba(59, 130, 246, 0.3);
+      transform: translateX(-50%) scale(0.65);
+      filter: grayscale(1);
+      opacity: 0.55;
+      transition: transform 0.6s var(--mola), border-color 0.4s ease, box-shadow 0.4s ease, filter 0.4s ease, opacity 0.4s ease;
+    }
+    .marco.aceso .marco-ponto {
+      transform: translateX(-50%) scale(1);
+      border-color: var(--azul-brilhante);
+      box-shadow: 0 0 0 6px rgba(59, 130, 246, 0.12), 0 0 26px rgba(59, 130, 246, 0.65);
+      filter: none;
       opacity: 1;
     }
 
+    .marco-card {
+      display: grid;
+      gap: 0.4rem;
+      padding: 1.25rem 1.3rem 1.35rem;
+      border-radius: 18px;
+      background: rgba(15, 41, 82, 0.55);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.3);
+      transition: border-color 0.5s ease, box-shadow 0.5s ease;
+    }
+    .marco.aceso .marco-card {
+      border-color: rgba(96, 165, 250, 0.45);
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.3), 0 0 30px rgba(59, 130, 246, 0.12);
+    }
+
+    .marco-foto {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+      border-radius: 12px;
+      margin-bottom: 0.5rem;
+      height: auto;
+      max-height: 300px;
+      cursor: zoom-in;
+      background: rgba(26, 74, 138, 0.4);
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+    .marco-foto.carregada { opacity: 1; }
+
+    .marco-data {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--azul-brilhante);
+    }
+    .marco-titulo {
+      font-family: var(--font-titulo);
+      font-size: clamp(1.25rem, 4vw, 1.5rem);
+      font-weight: 600;
+      line-height: 1.25;
+      color: var(--branco);
+    }
+    .marco-texto {
+      font-size: 0.98rem;
+      font-weight: 300;
+      line-height: 1.7;
+      color: var(--texto-claro);
+    }
+
+    .marco.futuro .marco-card {
+      border-style: dashed;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(15, 41, 82, 0.45));
+    }
+
+    /* Entrada dos marcos (pelo lado) */
+    .marco.revelar { transform: translateX(34px); }
+    .marco.revelar.visivel { transform: none; }
+
+    @media (min-width: 900px) {
+      .timeline-trilho, .timeline-cabeca { left: 50%; }
+      .timeline-trilho { margin-left: -1px; }
+
+      .marco { width: 50%; padding-left: 0; padding-right: 58px; margin-bottom: 0; }
+      .marco + .marco { margin-top: -2.5rem; }
+      .marco:nth-child(even) { margin-left: 50%; padding-right: 0; padding-left: 58px; }
+      .marco:nth-child(odd) .marco-card { text-align: right; }
+
+      .marco-ponto { left: auto; right: 0; transform: translateX(50%) scale(0.65); }
+      .marco.aceso .marco-ponto { transform: translateX(50%) scale(1); }
+      .marco:nth-child(even) .marco-ponto { right: auto; left: 0; transform: translateX(-50%) scale(0.65); }
+      .marco:nth-child(even).aceso .marco-ponto { transform: translateX(-50%) scale(1); }
+
+      .marco.revelar:nth-child(odd) { transform: translateX(-40px); }
+      .marco.revelar.visivel:nth-child(odd) { transform: none; }
+    }
+
     /* ============================================================ */
-    /*  FOTOS DO MURAL — EDITE O src= DE CADA IMAGEM ABAIXO       */
+    /*  MURAL DE MEMÓRIAS — POLAROIDS                              */
     /* ============================================================ */
-    .foto-card img {
+    #memorias {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 5rem 1.25rem;
+      overflow-x: clip;
+    }
+
+    .mural {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1.7rem 1rem;
+      padding: 0.6rem 0.2rem;
+    }
+
+    .polaroid {
+      --rot: 0deg;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      padding: 8px 8px 0;
+      border-radius: 3px;
+      background: var(--papel);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.38), 0 2px 6px rgba(0, 0, 0, 0.25);
+      transform: rotate(calc(var(--rot) * var(--fator-rot)));
+      cursor: pointer;
+      touch-action: manipulation;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+    }
+
+    /* Fitinha adesiva no topo */
+    .polaroid::before {
+      content: '';
+      position: absolute;
+      top: -10px; left: 50%;
+      z-index: 2;
+      width: 62px; height: 22px;
+      transform: translateX(-50%) rotate(-3deg);
+      background: rgba(191, 219, 254, 0.6);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18);
+    }
+    .polaroid:nth-child(3n)::before   { transform: translateX(-50%) rotate(4deg); }
+    .polaroid:nth-child(3n+1)::before { transform: translateX(-40%) rotate(-6deg); }
+
+    /* Selinho de "curtida" */
+    .polaroid::after {
+      content: '♥';
+      position: absolute;
+      top: 15px; right: 15px;
+      z-index: 2;
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-family: Arial, sans-serif;
+      font-size: 0.95rem;
+      color: #2563eb;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+      transform: scale(0);
+      transition: transform 0.5s var(--mola);
+    }
+    .polaroid.curtida::after { transform: scale(1); }
+
+    .polaroid-foto {
+      position: relative;
+      aspect-ratio: 4 / 5;
+      overflow: hidden;
+      border-radius: 1px;
+      background: linear-gradient(110deg, #dfe7f2 30%, #f1f5fb 50%, #dfe7f2 70%);
+      background-size: 220% 100%;
+      animation: carregando 1.4s linear infinite;
+    }
+    .polaroid-foto.ok { animation: none; }
+    @keyframes carregando { to { background-position: -120% 0; } }
+
+    .polaroid-foto img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      object-position: center;
-      display: block;
-      transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      opacity: 0;
+      transition: opacity 0.6s ease, transform 0.8s var(--suave);
+      -webkit-user-drag: none;
+    }
+    .polaroid-foto img.carregada { opacity: 1; }
+
+    .polaroid figcaption {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 3.1em;
+      padding: 0.5rem 0.3rem 0.7rem;
+      text-align: center;
+      font-family: var(--font-mao);
+      font-size: clamp(1.02rem, 3.7vw, 1.3rem);
+      font-weight: 500;
+      line-height: 1.15;
+      color: var(--tinta);
     }
 
-    .foto-card:hover img {
-      transform: scale(1.07);
+    .polaroid.destaque { grid-column: span 2; }
+    .polaroid.destaque .polaroid-foto { aspect-ratio: 4 / 3; }
+    .polaroid.destaque figcaption { font-size: clamp(1.2rem, 4.4vw, 1.55rem); }
+
+    /* Entrada: as polaroids "caem" e assentam na mesa */
+    .polaroid.revelar {
+      opacity: 0;
+      transform: translateY(-70px) rotate(calc(var(--rot) * -4)) scale(1.1);
+      transition: opacity 0.6s ease, transform 0.9s var(--mola), box-shadow 0.4s ease;
+    }
+    .polaroid.revelar.visivel { opacity: 1; transform: rotate(calc(var(--rot) * var(--fator-rot))); }
+    .polaroid.revelar.visivel:active { transform: rotate(0deg) scale(0.97); transition-duration: 0.2s; }
+
+    @media (hover: hover) {
+      .polaroid.revelar.visivel:hover {
+        z-index: 3;
+        transform: rotate(0deg) translateY(-8px) scale(1.045);
+        box-shadow: 0 26px 50px rgba(0, 0, 0, 0.45), 0 0 40px rgba(59, 130, 246, 0.25);
+      }
+      .polaroid:hover .polaroid-foto img { transform: scale(1.06); }
     }
 
-    .foto-overlay {
+    /* Coração grande do "curtir" (dois toques) */
+    .coracao-curtir {
+      position: absolute;
+      left: 50%; top: 50%;
+      z-index: 3;
+      margin: -0.5em 0 0 -0.45em;
+      font-family: Arial, sans-serif;
+      font-size: clamp(3.5rem, 17vw, 6rem);
+      line-height: 1;
+      color: var(--branco);
+      text-shadow: 0 0 25px rgba(59, 130, 246, 0.95), 0 4px 18px rgba(0, 0, 0, 0.3);
+      pointer-events: none;
+      animation: curtir 1s var(--suave) forwards;
+    }
+    @keyframes curtir {
+      0%   { transform: scale(0);    opacity: 0; }
+      15%  { transform: scale(1.3);  opacity: 1; }
+      30%  { transform: scale(0.92); }
+      45%  { transform: scale(1.06); }
+      75%  { transform: scale(1);    opacity: 1; }
+      100% { transform: translateY(-30px) scale(0.8); opacity: 0; }
+    }
+
+    @media (max-width: 639px) {
+      :root { --fator-rot: 0.7; }
+    }
+    @media (min-width: 640px) {
+      .mural { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2.2rem 1.6rem; }
+      .polaroid { padding: 10px 10px 0; }
+      .polaroid.destaque .polaroid-foto { aspect-ratio: 16 / 10; }
+    }
+    @media (min-width: 1024px) {
+      .mural { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2.6rem 2rem; }
+    }
+
+    /* ============================================================ */
+    /*  FOTO EM TELA CHEIA (LIGHTBOX)                              */
+    /* ============================================================ */
+    #lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      visibility: hidden;
+    }
+    #lightbox.aberto { visibility: visible; }
+
+    .lb-fundo {
       position: absolute;
       inset: 0;
-      background: linear-gradient(to top, rgba(10,22,40,0.85) 0%, transparent 60%);
+      background: rgba(4, 10, 22, 0.97);
       opacity: 0;
-      transition: opacity 0.4s ease;
+      transition: opacity 0.35s ease;
+    }
+    #lightbox.visivel .lb-fundo { opacity: 1; }
+
+    .lb-palco {
+      position: absolute;
+      inset: 0;
       display: flex;
-      align-items: flex-end;
-      padding: 1.2rem;
+      align-items: center;
+      justify-content: center;
+      padding-bottom: 96px;
+      touch-action: none;
+    }
+    .lb-img {
+      max-width: none;
+      object-fit: contain;
+      clip-path: inset(0px 0px round 8px);
+      will-change: transform;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-user-drag: none;
     }
 
-    .foto-legenda {
+    .lb-rodape {
+      position: absolute;
+      left: 0; right: 0;
+      bottom: calc(18px + env(safe-area-inset-bottom));
+      padding: 0 1.5rem;
+      text-align: center;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.4s ease 0.15s, transform 0.4s var(--suave) 0.15s;
+    }
+    #lightbox.visivel .lb-rodape { opacity: 1; transform: none; }
+
+    .lb-legenda {
+      font-family: var(--font-mao);
+      font-size: clamp(1.45rem, 5.5vw, 1.9rem);
+      line-height: 1.2;
+      color: var(--branco);
+      margin-bottom: 0.35rem;
+    }
+    .lb-contagem {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      color: var(--texto-suave);
+    }
+
+    .lb-botao {
+      position: absolute;
+      z-index: 2;
+      width: 46px; height: 46px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 1.15rem;
+      color: var(--branco);
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      opacity: 0;
+      transition: opacity 0.3s ease, background 0.3s ease, transform 0.3s var(--mola);
+    }
+    #lightbox.visivel .lb-botao { opacity: 1; }
+    .lb-botao:hover  { background: rgba(59, 130, 246, 0.35); }
+    .lb-botao:active { transform: scale(0.9); }
+    .lb-fechar { top: calc(14px + env(safe-area-inset-top)); right: 14px; }
+    .lb-ant, .lb-prox { top: 50%; margin-top: -71px; width: 54px; height: 54px; font-size: 1.8rem; }
+    .lb-ant  { left: 20px; }
+    .lb-prox { right: 20px; }
+    @media (hover: none), (max-width: 767px) { .lb-ant, .lb-prox { display: none; } }
+
+    .lb-dica {
+      position: absolute;
+      left: 50%; top: calc(18px + env(safe-area-inset-top));
+      z-index: 2;
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--branco);
+      background: rgba(59, 130, 246, 0.3);
+      border: 1px solid rgba(96, 165, 250, 0.4);
+      transform: translate(-50%, -10px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.4s ease, transform 0.4s var(--suave);
+    }
+    .lb-dica.mostrar { opacity: 1; transform: translate(-50%, 0); }
+
+    /* ============================================================ */
+    /*  MOTIVOS PRA TE AMAR — BARALHO                              */
+    /* ============================================================ */
+    #motivos {
+      padding: 5rem 1.25rem 5.5rem;
+      text-align: center;
+      background: radial-gradient(ellipse 70% 55% at 50% 55%, rgba(26, 74, 138, 0.35), transparent 70%);
+    }
+    #motivos .secao-cabecalho { margin-bottom: 2.6rem; }
+
+    .baralho {
+      position: relative;
+      width: min(80vw, 330px);
+      aspect-ratio: 4 / 5;
+      margin: 0 auto 1.8rem;
+    }
+    /* Cartas de trás do monte */
+    .baralho::before, .baralho::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 22px;
+      background: linear-gradient(145deg, #1a4a8a, #0f2952);
+      border: 1px solid rgba(96, 165, 250, 0.22);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
+    }
+    .baralho::before { transform: rotate(-6deg) translate(-8px, 8px); }
+    .baralho::after  { transform: rotate(4deg) translate(8px, 5px); }
+
+    .cm-mover {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      perspective: 1200px;
+      touch-action: pan-y;
+      cursor: grab;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    .carta-motivo {
+      position: absolute;
+      inset: 0;
+      transform-style: preserve-3d;
+      transition: transform 0.8s var(--suave);
+    }
+    .carta-motivo.virada { transform: rotateY(180deg); }
+
+    .cm-face {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      padding: 2rem 1.6rem;
+      border-radius: 22px;
+      overflow: hidden;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+    }
+
+    .cm-verso {
+      color: var(--branco);
+      border: 1px solid rgba(191, 219, 254, 0.35);
+      background:
+        radial-gradient(rgba(255, 255, 255, 0.09) 1.5px, transparent 2px) 0 0 / 20px 20px,
+        radial-gradient(circle at 30% 20%, rgba(96, 165, 250, 0.45), transparent 55%),
+        linear-gradient(145deg, #2563eb, #0f2952);
+    }
+    .cm-verso .grande {
+      font-family: Arial, sans-serif;
+      font-size: 5rem;
+      line-height: 1;
+      color: var(--branco);
+      text-shadow: 0 0 30px rgba(191, 219, 254, 0.8);
+      animation: selo-pulsa 1.8s ease-in-out infinite;
+    }
+    .cm-verso .chamada {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--azul-pastel);
+    }
+
+    .cm-frente {
+      transform: rotateY(180deg);
+      color: var(--tinta);
+      background:
+        radial-gradient(circle at 85% 10%, rgba(59, 130, 246, 0.1), transparent 40%),
+        var(--papel);
+    }
+    .cm-num {
+      position: absolute;
+      top: 1.1rem; left: 1.4rem;
       font-family: var(--font-titulo);
       font-style: italic;
-      font-size: 0.95rem;
-      color: var(--branco);
-      line-height: 1.3;
+      font-size: 1.05rem;
+      color: var(--azul-brilhante);
     }
+    .cm-texto {
+      font-family: var(--font-mao);
+      font-size: clamp(1.6rem, 6.6vw, 2.1rem);
+      font-weight: 700;
+      line-height: 1.2;
+    }
+    .cm-coracao { font-family: Arial, sans-serif; font-size: 1.6rem; color: var(--azul-brilhante); }
 
-    /* Foto destaque: ocupa 2 colunas na linha */
-    .foto-card.destaque {
-      grid-column: span 2;
-      aspect-ratio: 16 / 10.3;
+    .motivos-contagem {
+      min-height: 1.4em;
+      margin-bottom: 1.1rem;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--texto-suave);
     }
+    .motivos-contagem b { color: var(--branco); }
 
     /* ============================================================ */
     /*  A CARTA ABERTA                                             */
     /* ============================================================ */
-    #carta {
-      position: relative;
-      z-index: 1;
-      padding: 5rem 1.5rem 6rem;
-    }
+    #carta { padding: 5rem 1.25rem 6rem; }
 
-    .carta-wrapper {
-      max-width: 780px;
-      margin: 0 auto;
-      position: relative;
-    }
+    .carta-wrapper { max-width: 780px; margin: 0 auto; }
 
-    /* Card glassmorphism com borda brilhante */
     .carta-card {
-      background: rgba(15, 30, 60, 0.6);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-radius: 24px;
-      border: 1px solid rgba(59, 130, 246, 0.35);
-      padding: clamp(2rem, 6vw, 4rem);
       position: relative;
       overflow: hidden;
-      box-shadow:
-        0 0 0 1px rgba(59,130,246,0.1),
-        0 30px 80px rgba(0,0,0,0.5),
-        inset 0 1px 0 rgba(255,255,255,0.08);
+      padding: clamp(2rem, 6vw, 4rem);
+      border-radius: 24px;
+      background: rgba(15, 30, 60, 0.7);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(59, 130, 246, 0.35);
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.1), 0 30px 80px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.08);
     }
 
-    /* Brilho animado na borda */
+    /* Brilho que corre na borda de cima */
     .carta-card::before {
       content: '';
       position: absolute;
-      top: 0; left: -100%;
-      width: 200%; height: 2px;
+      top: 0; left: 0;
+      width: 100%; height: 2px;
       background: linear-gradient(90deg, transparent, var(--azul-brilhante), transparent);
       animation: borda-brilho 4s linear infinite;
     }
-
     @keyframes borda-brilho {
-      from { left: -100%; }
-      to   { left: 100%; }
-    }
-
-    /* Textura de papel simulada */
-    .carta-card::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image:
-        radial-gradient(circle at 20% 20%, rgba(59,130,246,0.04) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(59,130,246,0.04) 0%, transparent 50%);
-      pointer-events: none;
+      from { transform: translateX(-100%); }
+      to   { transform: translateX(100%); }
     }
 
     .carta-icone {
       text-align: center;
       font-size: 2.5rem;
       margin-bottom: 1.5rem;
-      animation: icone-pulsar 2s ease-in-out infinite;
+      filter: drop-shadow(0 0 12px rgba(59, 130, 246, 0.55));
     }
-
+    .carta-icone span { display: inline-block; animation: icone-pulsar 2s ease-in-out infinite; }
     @keyframes icone-pulsar {
-      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(59,130,246,0.4)); }
-      50%       { transform: scale(1.1); filter: drop-shadow(0 0 18px rgba(59,130,246,0.7)); }
+      0%, 100% { transform: scale(1); }
+      15%      { transform: scale(1.15); }
+      30%      { transform: scale(1); }
+      45%      { transform: scale(1.1); }
     }
 
-    /* ============================================================ */
-    /*  TÍTULO DA CARTA — ANIMAÇÃO MÁQUINA DE ESCREVER             */
-    /* ============================================================ */
+    /* Título digitado (máquina de escrever) */
     .carta-titulo {
+      min-height: 1.25em;
+      margin-bottom: 0.5rem;
       font-family: var(--font-titulo);
-      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-size: clamp(1.75rem, 5vw, 2.8rem);
       font-weight: 700;
       font-style: italic;
-      color: var(--branco);
       text-align: center;
-      margin-bottom: 0.5rem;
-      min-height: 1.2em;
+      color: var(--branco);
     }
-
     .cursor-digitando {
       display: inline-block;
-      width: 2px;
-      height: 1em;
-      background: var(--azul-brilhante);
+      width: 2px; height: 1em;
       margin-left: 3px;
       vertical-align: middle;
+      background: var(--azul-brilhante);
       animation: piscar-cursor 0.8s steps(1) infinite;
     }
+    @keyframes piscar-cursor { 50% { opacity: 0; } }
 
-    @keyframes piscar-cursor {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0; }
-    }
+    .carta-divider { display: flex; align-items: center; gap: 1rem; margin: 1.5rem 0 2rem; }
+    .carta-divider span { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.4), transparent); }
+    .carta-divider .florzinha { flex: none; height: auto; background: none; color: var(--azul-claro); }
 
-    .carta-divider {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin: 1.5rem 0 2rem;
-    }
-
-    .carta-divider span {
-      flex: 1;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(59,130,246,0.4), transparent);
-    }
-
-    .carta-divider .florzinha { color: var(--azul-claro); font-size: 1rem; }
-
-    /* ============================================================ */
-    /*  TEXTO DA CARTA — EDITE OS PARÁGRAFOS ABAIXO                */
-    /* ============================================================ */
     .carta-paragrafo {
-      font-size: clamp(0.95rem, 2.5vw, 1.05rem);
-      font-weight: 300;
-      line-height: 1.85;
-      color: var(--texto-claro);
       margin-bottom: 1.4rem;
+      font-size: clamp(0.98rem, 2.6vw, 1.06rem);
+      font-weight: 300;
+      line-height: 1.9;
+      color: var(--texto-claro);
       opacity: 0;
-      transform: translateY(15px);
-      transition: opacity 0.7s ease, transform 0.7s ease;
+      transform: translateY(16px);
+      filter: blur(4px);
+      transition: opacity 0.9s ease, transform 0.9s var(--suave), filter 0.9s ease;
     }
-
-    .carta-paragrafo.visivel {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .carta-paragrafo strong {
-      color: var(--azul-claro);
-      font-weight: 700;
-    }
+    .carta-paragrafo.visivel { opacity: 1; transform: none; filter: none; }
+    .carta-paragrafo strong { color: var(--azul-claro); font-weight: 700; }
 
     .carta-assinatura {
-      text-align: right;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.2rem;
+      margin-top: 2rem;
+    }
+    .assin-linha1 {
       font-family: var(--font-titulo);
       font-style: italic;
-      font-size: 1.3rem;
-      color: var(--azul-claro);
-      margin-top: 2rem;
+      font-size: 1.05rem;
+      color: var(--texto-suave);
       opacity: 0;
-      transition: opacity 0.8s ease 0.3s;
+      transition: opacity 0.8s ease;
     }
+    /* O nome é "escrito" da esquerda para a direita */
+    .assin-nome {
+      font-family: var(--font-mao);
+      font-weight: 700;
+      font-size: clamp(1.9rem, 6vw, 2.5rem);
+      line-height: 1.1;
+      color: var(--azul-claro);
+      clip-path: inset(0 100% 0 0);
+      transition: clip-path 1.9s cubic-bezier(0.65, 0, 0.35, 1) 0.5s;
+    }
+    .carta-assinatura.visivel .assin-linha1 { opacity: 1; }
+    .carta-assinatura.visivel .assin-nome   { clip-path: inset(0 0 0 0); }
 
-    .carta-assinatura.visivel {
-      opacity: 1;
+    /* P.S. em letra de mão, que aparece depois da assinatura */
+    .carta-ps {
+      display: block;
+      margin-top: 2.2rem;
+      font-family: var(--font-mao);
+      font-size: clamp(1.25rem, 4.2vw, 1.5rem);
+      line-height: 1.3;
+      color: var(--texto-suave);
+      text-decoration: none;
+      opacity: 0;
+      transform: translateY(10px) rotate(-1.5deg);
+      transition: opacity 1s ease 2.3s, transform 1s var(--suave) 2.3s, color 0.3s ease;
     }
+    .carta-ps.visivel { opacity: 1; transform: rotate(-1.5deg); }
+    .carta-ps:hover   { color: var(--azul-pastel); }
 
     /* ============================================================ */
-    /*  RODAPÉ                                                      */
+    /*  SURPRESA FINAL                                              */
+    /* ============================================================ */
+    #surpresa {
+      padding: 5rem 1.25rem 4rem;
+      text-align: center;
+      background: radial-gradient(ellipse 70% 60% at 50% 50%, rgba(37, 99, 235, 0.16), transparent 70%);
+    }
+
+    .surpresa-pergunta {
+      margin-bottom: 1.2rem;
+      font-family: var(--font-titulo);
+      font-size: clamp(2.5rem, 10vw, 4.2rem);
+      font-weight: 700;
+      color: var(--branco);
+      text-shadow: 0 0 50px rgba(59, 130, 246, 0.45);
+    }
+    .surpresa-pergunta em { font-style: italic; color: var(--azul-claro); }
+
+    .surpresa-area {
+      position: relative;
+      max-width: 520px;
+      height: 230px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.2rem;
+      transition: opacity 0.45s ease, transform 0.45s ease;
+    }
+    .surpresa-area.sumindo { opacity: 0; transform: scale(0.9); }
+
+    .botao-sim {
+      position: relative;
+      z-index: 1;
+      padding: 1rem 2.4rem;
+      font-size: 1.1rem;
+      border-color: transparent;
+      background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+      box-shadow: 0 12px 34px rgba(37, 99, 235, 0.5);
+      transform: translateX(var(--centro, 0px)) scale(var(--escala, 1));
+      transition: transform 0.5s var(--mola), background 0.3s ease, box-shadow 0.3s ease;
+    }
+    .botao-sim::after {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: inherit;
+      border: 2px solid rgba(96, 165, 250, 0.6);
+      animation: anel 2s ease-out infinite;
+      pointer-events: none;
+    }
+    @keyframes anel {
+      from { transform: scale(0.9); opacity: 1; }
+      to   { transform: scale(1.35); opacity: 0; }
+    }
+    .botao-sim:hover  { background: linear-gradient(135deg, #60a5fa, #2563eb); transform: translateX(var(--centro, 0px)) scale(calc(var(--escala, 1) * 1.06)); }
+    .botao-sim:active { transform: translateX(var(--centro, 0px)) scale(calc(var(--escala, 1) * 0.94)); }
+
+    .botao-nao {
+      position: relative;
+      z-index: 2;
+      border-color: rgba(148, 184, 232, 0.45);
+      background: rgba(10, 22, 40, 0.6);
+      color: var(--texto-suave);
+      box-shadow: none;
+      transition: transform 0.45s var(--mola), background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+    .botao-nao:hover { transform: none; background: rgba(10, 22, 40, 0.6); box-shadow: none; }
+    .botao-nao.rendido { color: var(--branco); border-color: var(--azul-brilhante); background: rgba(59, 130, 246, 0.3); }
+
+    .surpresa-resposta {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+      min-height: 230px;
+      justify-content: center;
+      opacity: 0;
+      transform: scale(0.8);
+      transition: opacity 0.6s ease, transform 0.8s var(--mola);
+    }
+    .surpresa-resposta.visivel { opacity: 1; transform: none; }
+    .resposta-titulo {
+      font-family: var(--font-mao);
+      font-weight: 700;
+      font-size: clamp(3rem, 12vw, 4.2rem);
+      line-height: 1;
+      color: var(--azul-claro);
+      text-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+    }
+    .resposta-texto { font-size: 1.1rem; font-weight: 300; color: var(--texto-claro); margin-bottom: 1.4rem; }
+
+    /* ============================================================ */
+    /*  RODAPÉ + SEGREDO                                            */
     /* ============================================================ */
     footer {
       position: relative;
       z-index: 1;
+      padding: 3rem 1rem calc(7rem + env(safe-area-inset-bottom));
       text-align: center;
-      padding: 3rem 1rem;
-      border-top: 1px solid rgba(59,130,246,0.12);
+      border-top: 1px solid rgba(59, 130, 246, 0.12);
     }
+    @media (min-width: 900px) { footer { padding-bottom: 3rem; } }
 
     .footer-coracao {
-      font-size: 2rem;
-      animation: icone-pulsar 2s ease-in-out infinite;
-      display: block;
+      display: inline-block;
       margin-bottom: 0.8rem;
+      padding: 0.3rem;
+      font-size: 2.2rem;
+      line-height: 1;
+      transform: scale(var(--s, 1));
+      transition: transform 0.4s var(--mola);
+      touch-action: manipulation;
+    }
+    .footer-coracao span { display: inline-block; animation: icone-pulsar 2s ease-in-out infinite; }
+
+    .footer-texto { font-size: 0.8rem; letter-spacing: 0.1em; color: var(--texto-suave); }
+
+    .footer-dica {
+      margin-top: 0.9rem;
+      font-family: var(--font-mao);
+      font-size: 1.15rem;
+      color: var(--texto-suave);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 1s ease, transform 1s var(--suave);
+    }
+    .footer-dica.visivel { opacity: 0.85; transform: none; }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1050;
+      display: grid;
+      place-items: center;
+      padding: 1.5rem;
+      background: rgba(4, 10, 22, 0.78);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.35s ease, visibility 0s 0.35s;
+    }
+    .modal.aberto { opacity: 1; visibility: visible; transition: opacity 0.35s ease; }
+
+    .modal-caixa {
+      width: 100%;
+      max-width: 420px;
+      padding: 2.4rem 1.8rem 2rem;
+      border-radius: 24px;
+      text-align: center;
+      background: linear-gradient(160deg, rgba(26, 74, 138, 0.97), rgba(10, 22, 40, 0.98));
+      border: 1px solid rgba(96, 165, 250, 0.4);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 60px rgba(59, 130, 246, 0.25);
+      transform: scale(0.85) translateY(24px);
+      transition: transform 0.55s var(--mola);
+    }
+    .modal.aberto .modal-caixa { transform: none; }
+    .modal-icone { font-size: 2.6rem; margin-bottom: 0.8rem; }
+    .modal-titulo {
+      margin-bottom: 1rem;
+      font-family: var(--font-mao);
+      font-weight: 700;
+      font-size: 2.2rem;
+      line-height: 1.1;
+      color: var(--azul-claro);
+    }
+    .modal-texto {
+      margin-bottom: 1.6rem;
+      font-size: 1rem;
+      font-weight: 300;
+      line-height: 1.8;
+      color: var(--texto-claro);
     }
 
-    .footer-texto {
-      font-size: 0.8rem;
-      color: var(--texto-suave);
-      letter-spacing: 0.1em;
+    /* ============================================================ */
+    /*  EFEITOS: CORAÇÕES QUE EXPLODEM / CHUVA                     */
+    /* ============================================================ */
+    .faisca {
+      position: fixed;
+      z-index: 1200;
+      margin: -0.5em 0 0 -0.4em;
+      font-family: Arial, sans-serif;
+      line-height: 1;
+      text-shadow: 0 0 6px rgba(59, 130, 246, 0.6);
+      pointer-events: none;
+      will-change: transform, opacity;
+    }
+    .chuva {
+      position: fixed;
+      inset: 0;
+      width: 100%; height: 100%;
+      z-index: 1150;
+      pointer-events: none;
     }
 
     /* ============================================================ */
@@ -652,383 +1927,520 @@
     .revelar {
       opacity: 0;
       transform: translateY(35px);
-      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-                  transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: opacity 0.9s var(--suave), transform 0.9s var(--suave), filter 0.9s var(--suave);
     }
-
-    .revelar.visivel {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    .revelar.desfoque { filter: blur(10px); }
+    .revelar.zoom     { transform: scale(0.9); }
+    .revelar.visivel  { opacity: 1; transform: none; filter: none; }
 
     .revelar-delay-1 { transition-delay: 0.1s; }
     .revelar-delay-2 { transition-delay: 0.2s; }
     .revelar-delay-3 { transition-delay: 0.3s; }
-    .revelar-delay-4 { transition-delay: 0.4s; }
-    .revelar-delay-5 { transition-delay: 0.5s; }
-    .revelar-delay-6 { transition-delay: 0.6s; }
 
     @keyframes fade-up {
       from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
+      to   { opacity: 1; transform: none; }
     }
 
     /* ============================================================ */
     /*  RESPONSIVIDADE MOBILE                                       */
     /* ============================================================ */
-    @media (max-width: 768px) {
-      nav {
-        gap: 1rem;
-        padding: 1rem 1rem;
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-
-      nav a { font-size: 0.68rem; }
-
-      /* Grade de fotos vira scroll horizontal no mobile */
-      .memorias-grid {
-        display: flex;
-        overflow-x: auto;
-        gap: 1rem;
-        padding-bottom: 1rem;
-        scroll-snap-type: x mandatory;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-      }
-
-      .memorias-grid::-webkit-scrollbar { display: none; }
-
-      .foto-card {
-        flex: 0 0 75vw;
-        max-width: 300px;
-        scroll-snap-align: center;
-        aspect-ratio: 3 / 4;
-      }
-
-      .foto-card.destaque {
-        flex: 0 0 85vw;
-        max-width: 340px;
-        aspect-ratio: 4 / 5;
-      }
-
-      .contador-separador { font-size: 1.8rem; padding-top: 0.4rem; }
-
-      .contador-linha { gap: 0.5rem; }
-
-      .contador-grid { gap: 1rem; }
-
-      .contador-numero { font-size: clamp(2rem, 10vw, 2.8rem); min-width: 68px; padding: 0.5rem 0.7rem; }
+    @media (max-width: 380px) {
+      .hero-subtitulo { letter-spacing: 0.18em; }
+    }
+    @media (max-width: 360px) {
+      .contador-label { font-size: 0.6rem; letter-spacing: 0.14em; }
+      #menu a { min-width: 46px; padding: 7px 4px 6px; }
     }
 
-    /* Tablet */
-    @media (min-width: 769px) and (max-width: 1024px) {
-      .memorias-grid {
-        grid-template-columns: repeat(2, 1fr);
+    /* Quem pediu menos movimento no celular/computador */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        animation-delay: 0s !important;
+        transition-duration: 0.01ms !important;
+        transition-delay: 0s !important;
       }
-      .foto-card.destaque {
-        grid-column: span 2;
-        aspect-ratio: 16 / 8;
-      }
+      html { scroll-behavior: auto; }
     }
   </style>
+
+  <noscript>
+    <style>
+      #abertura { display: none; }
+      .revelar, .hero-subtitulo, .hero-frase, .hero-btn, .hero-titulo .palavra,
+      .carta-paragrafo, .assin-linha1, .polaroid-foto img, .marco-foto { opacity: 1 !important; transform: none !important; filter: none !important; }
+      .assin-nome { clip-path: none !important; }
+      html.travado, html.travado body { overflow: auto; }
+    </style>
+  </noscript>
 </head>
 
 <body>
 
+  <div class="aurora" aria-hidden="true"></div>
+  <canvas id="particulas-canvas" aria-hidden="true"></canvas>
+
   <!-- ============================================================ -->
-  <!--  CANVAS DE PARTÍCULAS (gerado automaticamente pelo JS)      -->
+  <!--  ABERTURA — ENVELOPE "TOQUE PARA ABRIR"                     -->
+  <!--  ↓ EDITE O TEXTO DE CIMA E AS DUAS LINHAS DA CARTINHA      -->
   <!-- ============================================================ -->
-  <canvas id="particulas-canvas"></canvas>
+  <div id="abertura" role="dialog" aria-label="Surpresa: toque para abrir">
+    <div class="ab-conteudo">
+      <p class="abertura-texto">
+        <span class="ab-linha">Tenho uma coisinha</span>
+        <span class="ab-linha">pra você, <em>queridinha</em> 💌</span>
+      </p>
+
+      <div class="envelope-cena">
+        <div class="envelope-inclina" id="envelope-inclina">
+          <button type="button" class="envelope" id="envelope" aria-label="Toque para abrir">
+            <span class="env-luz"></span>
+            <span class="env-fundo"></span>
+            <span class="env-carta" id="env-carta">
+              <span class="carta-tinta"></span>
+              <span class="carta-l1">Oi, minha queridinha... 💙</span>
+              <span class="carta-l2">preparei isso com todo o meu amor</span>
+            </span>
+            <span class="env-frente"><span class="env-brilho"></span></span>
+            <span class="env-aba"></span>
+            <span class="env-selo">
+              <span class="selo-sombra"></span>
+              <span class="selo-metade esq">♥</span>
+              <span class="selo-metade dir">♥</span>
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <p class="abertura-dica" aria-hidden="true"><span class="dedo">👆</span><span class="texto">Toque para abrir</span></p>
+  </div>
+
+  <!-- Barra de progresso (coraçãozinho no topo da tela) -->
+  <div id="progresso" aria-hidden="true"><div class="barra"></div></div>
 
   <!-- ============================================================ -->
   <!--  NAVEGAÇÃO                                                   -->
   <!-- ============================================================ -->
-  <nav>
-    <a href="#contador">Nosso Tempo</a>
-    <a href="#memorias">Memórias</a>
-    <a href="#carta">Minha Carta</a>
+  <nav id="menu" aria-label="Seções">
+    <a href="#contador"><span class="ico" aria-hidden="true">⏳</span><span>Tempo</span></a>
+    <a href="#historia"><span class="ico" aria-hidden="true">📜</span><span>História</span></a>
+    <a href="#memorias"><span class="ico" aria-hidden="true">📸</span><span>Fotos</span></a>
+    <a href="#motivos"><span class="ico" aria-hidden="true">💙</span><span>Motivos</span></a>
+    <a href="#carta"><span class="ico" aria-hidden="true">💌</span><span>Carta</span></a>
+    <a href="#surpresa"><span class="ico" aria-hidden="true">🎁</span><span>Surpresa</span></a>
   </nav>
 
   <!-- ============================================================ -->
-  <!--  SEÇÃO 1: HERO — FOTO DE CAPA                               -->
-  <!--  ↓ EDITE O src= ABAIXO COM A URL/CAMINHO DA FOTO DE VOCÊS  -->
+  <!--  SEÇÃO 1: CAPA — A FOTO DENTRO DO CORAÇÃO                  -->
+  <!--  ↓ EDITE OS DOIS src= COM O CAMINHO DA FOTO DE VOCÊS        -->
   <!-- ============================================================ -->
   <section id="hero">
-    <img
-      id="hero-foto"
-      src=fotos/foto-principal.jpg
-      alt="Nossa Foto"
-    />
+    <div class="hero-fundo" aria-hidden="true">
+      <img src="fotos/foto-principal.jpg" alt="" decoding="async" />
+    </div>
 
-    <div class="hero-conteudo">
-      <!-- EDITE O SUBTÍTULO ABAIXO -->
-      <p class="hero-subtitulo">✦ Meu presente para o meu amor ✦</p>
+    <div class="hero-palco">
+      <div class="hero-coracao" id="hero-coracao" role="img" aria-label="Nossa foto dentro de um coração">
+        <div class="coracao-aura"></div>
+        <div class="coracao-orbita" aria-hidden="true">
+          <span style="--i:0"><i>♥</i></span>
+          <span style="--i:1"><i>♥</i></span>
+          <span style="--i:2"><i>♥</i></span>
+          <span style="--i:3"><i>♥</i></span>
+          <span style="--i:4"><i>♥</i></span>
+          <span style="--i:5"><i>♥</i></span>
+          <span style="--i:6"><i>♥</i></span>
+          <span style="--i:7"><i>♥</i></span>
+        </div>
+        <div class="coracao-inclina">
+          <div class="coracao-bate">
+            <div class="coracao-janela">
+              <img id="hero-foto" src="fotos/foto-principal.jpg" alt="" width="2000" height="1500" fetchpriority="high" decoding="async" />
+            </div>
+            <svg class="coracao-contorno" viewBox="0 0 100 90" preserveAspectRatio="none" aria-hidden="true">
+              <path pathLength="1" d="M50 88C20 66 2 48 2 28 2 12 14 2 28 2c10 0 18 6 22 14C54 8 62 2 72 2c14 0 26 10 26 26 0 20-18 38-48 60z" />
+            </svg>
+          </div>
+        </div>
+      </div>
 
-      <!-- EDITE O NOME ABAIXO -->
-      <h1 class="hero-titulo">
-        Para a minha <em>queridinha</em>,<br>que é o meu mundo
-      </h1>
+      <div class="hero-conteudo">
+        <!-- EDITE O SUBTÍTULO ABAIXO -->
+        <p class="hero-subtitulo">✦ Meu presente para o meu amor ✦</p>
 
-      <!-- EDITE A FRASE ABAIXO -->
-      <p class="hero-frase">
-        Cada dia ao seu lado é um presente que eu nunca imaginei
-        merecer. Você é especial demais pra mim...<br>Que você saiba o taaanto que eu te amo! 💙
-      </p>
+        <!-- EDITE O TÍTULO ABAIXO (o nome do meio sai escrito à mão) -->
+        <h1 class="hero-titulo">
+          <span class="linha linha-a">Para a minha</span>
+          <span class="hero-nome">queridinha,</span>
+          <span class="linha linha-b">que é o meu mundo</span>
+        </h1>
 
-      <a href="#contador" class="hero-btn">
-        Continue lendo
-        <span class="seta">↓</span>
-      </a>
+        <!-- EDITE A FRASE ABAIXO -->
+        <p class="hero-frase">
+          Cada dia ao seu lado é um presente que eu nunca imaginei
+          merecer. Você é especial demais pra mim...<br>Que você saiba o taaanto que eu te amo! 💙
+        </p>
+
+        <a href="#contador" class="botao hero-btn">
+          Continue lendo
+          <span class="seta" aria-hidden="true">↓</span>
+        </a>
+      </div>
     </div>
   </section>
 
   <!-- ============================================================ -->
-  <!--  SEÇÃO 2: CONTADOR DE TEMPO                                 -->
+  <!--  SEÇÃO 2: CONTADOR DE TEMPO (RELÓGIO FLIP)                  -->
+  <!--  (a data de início fica no JavaScript, lá embaixo)          -->
   <!-- ============================================================ -->
   <section id="contador">
     <p class="secao-rotulo revelar">💙 Nosso Amor em Números 💙</p>
 
     <!-- EDITE O TÍTULO ABAIXO -->
-    <h2 class="secao-titulo revelar revelar-delay-1">
+    <h2 class="secao-titulo revelar desfoque revelar-delay-1">
       Lembra quando <em>tudo</em> começou?
     </h2>
 
-    <div class="contador-grid revelar revelar-delay-2">
-
-      <!-- LINHA 1: Anos · Meses · Dias -->
-      <div class="contador-linha">
-
-        <div class="contador-item">
-          <span class="contador-numero" id="cnt-anos">00</span>
-          <span class="contador-label">Ano</span>
-        </div>
-
-        <div class="contador-separador">·</div>
-
-        <div class="contador-item">
-          <span class="contador-numero" id="cnt-meses">00</span>
-          <span class="contador-label">Meses</span>
-        </div>
-
-        <div class="contador-separador">·</div>
-
-        <div class="contador-item">
-          <span class="contador-numero" id="cnt-dias">00</span>
-          <span class="contador-label">Dias</span>
-        </div>
-
+    <div class="flip-relogio revelar revelar-delay-2" aria-label="Tempo desde que começamos a namorar">
+      <div class="flip-grupo">
+          <div class="flip-item">
+            <div class="flip" data-campo="anos">
+              <span class="flip-metade cima"><span>00</span></span>
+              <span class="flip-metade baixo"><span>00</span></span>
+              <span class="flip-aba frente"><span>00</span></span>
+              <span class="flip-aba tras"><span>00</span></span>
+            </div>
+            <span class="contador-label">Anos</span>
+          </div>
+          <div class="flip-item">
+            <div class="flip" data-campo="meses">
+              <span class="flip-metade cima"><span>00</span></span>
+              <span class="flip-metade baixo"><span>00</span></span>
+              <span class="flip-aba frente"><span>00</span></span>
+              <span class="flip-aba tras"><span>00</span></span>
+            </div>
+            <span class="contador-label">Meses</span>
+          </div>
+          <div class="flip-item">
+            <div class="flip" data-campo="dias">
+              <span class="flip-metade cima"><span>00</span></span>
+              <span class="flip-metade baixo"><span>00</span></span>
+              <span class="flip-aba frente"><span>00</span></span>
+              <span class="flip-aba tras"><span>00</span></span>
+            </div>
+            <span class="contador-label">Dias</span>
+          </div>
       </div>
-
-      <!-- LINHA 2: Horas · Minutos · Segundos -->
-      <div class="contador-linha">
-
-        <div class="contador-item">
-          <span class="contador-numero" id="cnt-horas">00</span>
-          <span class="contador-label">Horas</span>
-        </div>
-
-        <div class="contador-separador">:</div>
-
-        <div class="contador-item">
-          <span class="contador-numero" id="cnt-minutos">00</span>
-          <span class="contador-label">Minutos</span>
-        </div>
-
-        <div class="contador-separador">:</div>
-
-        <div class="contador-item">
-          <span class="contador-numero" id="cnt-segundos">00</span>
-          <span class="contador-label">Segundos</span>
-        </div>
-
+      <div class="flip-sep" aria-hidden="true">·</div>
+      <div class="flip-grupo">
+          <div class="flip-item">
+            <div class="flip" data-campo="horas">
+              <span class="flip-metade cima"><span>00</span></span>
+              <span class="flip-metade baixo"><span>00</span></span>
+              <span class="flip-aba frente"><span>00</span></span>
+              <span class="flip-aba tras"><span>00</span></span>
+            </div>
+            <span class="contador-label">Horas</span>
+          </div>
+          <div class="flip-item">
+            <div class="flip" data-campo="min">
+              <span class="flip-metade cima"><span>00</span></span>
+              <span class="flip-metade baixo"><span>00</span></span>
+              <span class="flip-aba frente"><span>00</span></span>
+              <span class="flip-aba tras"><span>00</span></span>
+            </div>
+            <span class="contador-label">Minutos</span>
+          </div>
+          <div class="flip-item">
+            <div class="flip" data-campo="seg">
+              <span class="flip-metade cima"><span>00</span></span>
+              <span class="flip-metade baixo"><span>00</span></span>
+              <span class="flip-aba frente"><span>00</span></span>
+              <span class="flip-aba tras"><span>00</span></span>
+            </div>
+            <span class="contador-label">Segundos</span>
+          </div>
       </div>
+    </div>
 
+    <p class="contador-total revelar revelar-delay-3">
+      Isso dá <strong id="cnt-total">0</strong> dias de nós dois... e contando 💙
+    </p>
+
+    <!-- Contagem até o próximo aniversário de namoro (automática) -->
+    <div class="aniversario revelar revelar-delay-3">
+      <p class="aniv-texto" id="aniv-texto">&nbsp;</p>
+      <div class="aniv-barra">
+        <div class="aniv-preenchido" id="aniv-preenchido"></div>
+        <span class="aniv-coracao" id="aniv-coracao" aria-hidden="true"><i>♥</i></span>
+      </div>
+      <div class="aniv-pontas"><span id="aniv-de"></span><span id="aniv-ate"></span></div>
     </div>
   </section>
 
   <!-- ============================================================ -->
-  <!--  SEÇÃO 3: MURAL DE MEMÓRIAS                                 -->
-  <!--  ↓ EDITE OS src= DAS IMAGENS E AS LEGENDAS ABAIXO          -->
+  <!--  SEÇÃO 3: LINHA DO TEMPO                                    -->
+  <!--  ↓ EDITE A DATA, O TÍTULO E O TEXTO DE CADA MARCO          -->
+  <!--  Para tirar a foto de um marco, apague a linha <img ...>   -->
+  <!--  Para adicionar um marco, copie um <article> inteiro       -->
   <!-- ============================================================ -->
-  <section id="memorias">
+  <section id="historia">
     <div class="secao-cabecalho">
-      <p class="secao-rotulo revelar">💙 Nossa História 💙</p>
-      <h2 class="secao-titulo revelar revelar-delay-1">
-        Momentos que <em>nós vivemos</em>
+      <p class="secao-rotulo revelar">💙 Nossa Linha do Tempo 💙</p>
+      <h2 class="secao-titulo revelar desfoque revelar-delay-1">
+        Os capítulos da <em>nossa história</em>
       </h2>
     </div>
 
-    <div class="memorias-grid">
+    <div class="timeline" id="timeline">
+      <div class="timeline-trilho"><div class="timeline-progresso" id="timeline-progresso"></div></div>
+      <div class="timeline-cabeca" id="timeline-cabeca" aria-hidden="true"></div>
 
-      <!-- FOTO 1 — DESTAQUE (ocupa 2 colunas no desktop) -->
-      <!-- EDITE o src= e a legenda abaixo -->
-      <div class="foto-card destaque revelar revelar-delay-1">
-        <img
-          src=fotos/foto1.jpg
-          alt="Memória 1"
-        />
-        <div class="foto-overlay">
-          <!-- EDITE A LEGENDA ABAIXO -->
-          <p class="foto-legenda">Esse dia com você foi massa demais 🏄🏼</p>
-        </div>
-      </div>
+      <div class="marcos">
 
-      <!-- FOTO 2 -->
-      <!-- EDITE o src= e a legenda abaixo -->
-      <div class="foto-card revelar revelar-delay-2">
-        <img
-          src=fotos/foto2.jpg
-          alt="Memória 2"
-        />
-        <div class="foto-overlay">
-          <!-- EDITE A LEGENDA ABAIXO -->
-          <p class="foto-legenda">Nosso primeiro ano 💍</p>
-        </div>
-      </div>
+        <!-- MARCO 1 — EDITE -->
+        <article class="marco revelar">
+          <div class="marco-ponto" aria-hidden="true">✨</div>
+          <div class="marco-card">
+            <span class="marco-data">Lá no começo</span>
+            <h3 class="marco-titulo">O dia em que te conheci</h3>
+            <p class="marco-texto">Eu nem imaginava que aquele dia ia mudar a minha vida inteira...</p>
+          </div>
+        </article>
 
-      <!-- FOTO 3 -->
-      <!-- EDITE o src= e a legenda abaixo -->
-      <div class="foto-card revelar revelar-delay-3">
-        <img
-          src=fotos/foto3.jpg
-          alt="Memória 3"
-        />
-        <div class="foto-overlay">
-          <!-- EDITE A LEGENDA ABAIXO -->
-          <p class="foto-legenda">Retiro 2025 📆</p>
-        </div>
-      </div>
+        <!-- MARCO 2 — EDITE -->
+        <article class="marco revelar">
+          <div class="marco-ponto" aria-hidden="true">📸</div>
+          <div class="marco-card">
+            <img class="marco-foto" src="fotos/mini/foto7.jpg" data-grande="fotos/foto7.jpg" alt="Nossa primeira foto" loading="lazy" decoding="async" width="506" height="900" />
+            <span class="marco-data">Os primeiros dias</span>
+            <h3 class="marco-titulo">Nossa primeira foto</h3>
+            <p class="marco-texto">A primeira de muitas! Uma foto que marca o início da nossa história, rs.</p>
+          </div>
+        </article>
 
-      <!-- FOTO 4 -->
-      <!-- EDITE o src= e a legenda abaixo -->
-      <div class="foto-card revelar revelar-delay-4">
-        <img
-          src=fotos/foto4.jpg
-          alt="Memória 4"
-        />
-        <div class="foto-overlay">
-          <!-- EDITE A LEGENDA ABAIXO -->
-          <p class="foto-legenda">Nossa tentativa juntos... 💪🏼</p>
-        </div>
-      </div>
+        <!-- MARCO 3 — EDITE -->
+        <article class="marco revelar">
+          <div class="marco-ponto" aria-hidden="true">💙</div>
+          <div class="marco-card">
+            <span class="marco-data">25 · 01 · 2025</span>
+            <h3 class="marco-titulo">Começamos a namorar</h3>
+            <p class="marco-texto">Tu era caidinha por mim, e eu por você. O resto é história...</p>
+          </div>
+        </article>
 
-      <!-- FOTO 5 -->
-      <!-- EDITE o src= e a legenda abaixo -->
-      <div class="foto-card revelar revelar-delay-5">
-        <img
-          src=fotos/foto5.jpg
-          alt="Memória 5"
-        />
-        <div class="foto-overlay">
-          <!-- EDITE A LEGENDA ABAIXO -->
-          <p class="foto-legenda">Aquele abraço... 💕</p>
-        </div>
-      </div>
+        <!-- MARCO 4 — EDITE -->
+        <article class="marco revelar">
+          <div class="marco-ponto" aria-hidden="true">🙏</div>
+          <div class="marco-card">
+            <img class="marco-foto" src="fotos/mini/foto3.jpg" data-grande="fotos/foto3.jpg" alt="Retiro 2025" loading="lazy" decoding="async" width="600" height="800" />
+            <span class="marco-data">2025</span>
+            <h3 class="marco-titulo">Retiro 2025</h3>
+            <p class="marco-texto">Juntos, pertinho de Deus e um do outro.</p>
+          </div>
+        </article>
 
-      <!-- FOTO 6 -->
-      <!-- EDITE o src= e a legenda abaixo -->
-      <div class="foto-card revelar revelar-delay-6">
-        <img
-          src=fotos/foto6.jpg
-          alt="Memória 6"
-        />
-        <div class="foto-overlay">
-          <!-- EDITE A LEGENDA ABAIXO -->
-          <p class="foto-legenda">Meu porto seguro ❤️</p>
-        </div>
-      </div>
+        <!-- MARCO 5 — EDITE -->
+        <article class="marco revelar">
+          <div class="marco-ponto" aria-hidden="true">💍</div>
+          <div class="marco-card">
+            <img class="marco-foto" src="fotos/mini/foto2.jpg" data-grande="fotos/foto2.jpg" alt="Nosso primeiro ano" loading="lazy" decoding="async" width="507" height="900" />
+            <span class="marco-data">25 · 01 · 2026</span>
+            <h3 class="marco-titulo">Nosso primeiro ano</h3>
+            <p class="marco-texto">365 dias de você... e eu já queria mais 365 mil.</p>
+          </div>
+        </article>
 
-      <!-- FOTO 7 -->
-      <!-- EDITE o src= e a legenda abaixo -->
-      <div class="foto-card revelar revelar-delay-6">
-        <img
-          src=fotos/foto7.jpg
-          alt="Memória 7"
-        />
-        <div class="foto-overlay">
-          <!-- EDITE A LEGENDA ABAIXO -->
-          <p class="foto-legenda">Nossa primeira foto 📸</p>
-        </div>
-      </div>
+        <!-- MARCO 6 — EDITE -->
+        <article class="marco revelar">
+          <div class="marco-ponto" aria-hidden="true">💻</div>
+          <div class="marco-card">
+            <span class="marco-data">12 · 06 · 2026</span>
+            <h3 class="marco-titulo">O primeiro site</h3>
+            <p class="marco-texto">No Dia dos Namorados te dei uma página feita linha por linha com amor... e olha a gente aqui de novo!</p>
+          </div>
+        </article>
 
-      <!-- FOTO 8 -->
-      <!-- EDITE o src= e a legenda abaixo -->
-      <div class="foto-card revelar revelar-delay-6">
-        <img
-          src=fotos/foto8.jpg
-          alt="Memória 8"
-        />
-        <div class="foto-overlay">
-          <!-- EDITE A LEGENDA ABAIXO -->
-          <p class="foto-legenda">Eu e Você 💕</p>
-        </div>
-      </div>
+        <!-- MARCO 7 — O FUTURO — EDITE -->
+        <article class="marco futuro revelar">
+          <div class="marco-ponto" aria-hidden="true">🌅</div>
+          <div class="marco-card">
+            <span class="marco-data">Daqui pra frente</span>
+            <h3 class="marco-titulo">Tudo o que ainda vem</h3>
+            <p class="marco-texto">Nossa família linda, nossos sonhos, nossas conquistas... com Deus na frente do barco, sempre juntos.</p>
+          </div>
+        </article>
 
-      <!-- FOTO 9 -->
-      <!-- EDITE o src= e a legenda abaixo -->
-      <div class="foto-card revelar revelar-delay-6">
-        <img
-          src=fotos/foto9.jpg
-          alt="Memória 9"
-        />
-        <div class="foto-overlay">
-          <!-- EDITE A LEGENDA ABAIXO -->
-          <p class="foto-legenda">Você sempre presente... 🌏</p>
-        </div>
       </div>
+    </div>
+  </section>
 
-      <!-- FOTO 10 -->
-      <!-- EDITE o src= e a legenda abaixo -->
-      <div class="foto-card revelar revelar-delay-6">
-        <img
-          src=fotos/foto10.jpg
-          alt="Memória 10"
-        />
-        <div class="foto-overlay">
-          <!-- EDITE A LEGENDA ABAIXO -->
-          <p class="foto-legenda">Eu gosto demais dessa nossa foto 🌴</p>
-        </div>
-      </div>
+  <!-- ============================================================ -->
+  <!--  SEÇÃO 4: MURAL DE MEMÓRIAS (POLAROIDS)                     -->
+  <!--  ↓ EDITE AS FOTOS E AS LEGENDAS ABAIXO                     -->
+  <!--  src=          → miniatura (fotos/mini/...) – carrega rápido -->
+  <!--  data-grande=  → foto grande que abre em tela cheia        -->
+  <!--  Foto nova sem miniatura? Use o mesmo caminho nos dois.    -->
+  <!-- ============================================================ -->
+  <section id="memorias">
+    <div class="secao-cabecalho">
+      <p class="secao-rotulo revelar">💙 Nossas Memórias 💙</p>
+      <h2 class="secao-titulo revelar desfoque revelar-delay-1">
+        Momentos que <em>nós vivemos</em>
+      </h2>
+      <p class="secao-dica revelar revelar-delay-2">toque numa foto pra ver de pertinho · dois toques pra curtir 💙</p>
+    </div>
 
-      <!-- FOTO 11 -->
-      <!-- EDITE o src= e a legenda abaixo -->
-      <div class="foto-card revelar revelar-delay-6">
-        <img
-          src=fotos/foto11.jpg
-          alt="Memória 11"
-        />
-        <div class="foto-overlay">
-          <!-- EDITE A LEGENDA ABAIXO -->
-          <p class="foto-legenda">Só músicas românticas pra você 🎶💕</p>
+    <div class="mural" id="mural">
+
+      <!-- FOTO 1 — DESTAQUE (ocupa 2 colunas) — EDITE -->
+      <figure class="polaroid destaque revelar" style="--rot:-1.2deg" tabindex="0" role="button">
+        <div class="polaroid-foto">
+          <img src="fotos/mini/foto1.jpg" data-grande="fotos/foto1.jpg" alt="Memória 1" loading="lazy" decoding="async" width="600" height="450" />
         </div>
-      </div>
+        <figcaption>Esse dia com você foi massa demais 🏄🏼</figcaption>
+      </figure>
+
+      <!-- FOTO 2 — EDITE -->
+      <figure class="polaroid revelar" style="--rot:3deg" tabindex="0" role="button">
+        <div class="polaroid-foto">
+          <img src="fotos/mini/foto2.jpg" data-grande="fotos/foto2.jpg" alt="Memória 2" loading="lazy" decoding="async" width="507" height="900" />
+        </div>
+        <figcaption>Nosso primeiro ano 💍</figcaption>
+      </figure>
+
+      <!-- FOTO 3 — EDITE -->
+      <figure class="polaroid revelar" style="--rot:-3.5deg" tabindex="0" role="button">
+        <div class="polaroid-foto">
+          <img src="fotos/mini/foto3.jpg" data-grande="fotos/foto3.jpg" alt="Memória 3" loading="lazy" decoding="async" width="600" height="800" />
+        </div>
+        <figcaption>Retiro 2025 📆</figcaption>
+      </figure>
+
+      <!-- FOTO 4 — EDITE -->
+      <figure class="polaroid revelar" style="--rot:2deg" tabindex="0" role="button">
+        <div class="polaroid-foto">
+          <img src="fotos/mini/foto4.jpg" data-grande="fotos/foto4.jpg" alt="Memória 4" loading="lazy" decoding="async" width="600" height="800" />
+        </div>
+        <figcaption>Nossa tentativa juntos... 💪🏼</figcaption>
+      </figure>
+
+      <!-- FOTO 5 — EDITE -->
+      <figure class="polaroid revelar" style="--rot:-2deg" tabindex="0" role="button">
+        <div class="polaroid-foto">
+          <img src="fotos/mini/foto5.jpg" data-grande="fotos/foto5.jpg" alt="Memória 5" loading="lazy" decoding="async" width="506" height="900" />
+        </div>
+        <figcaption>Aquele abraço... 💕</figcaption>
+      </figure>
+
+      <!-- FOTO 6 — EDITE -->
+      <figure class="polaroid revelar" style="--rot:3.5deg" tabindex="0" role="button">
+        <div class="polaroid-foto">
+          <img src="fotos/mini/foto6.jpg" data-grande="fotos/foto6.jpg" alt="Memória 6" loading="lazy" decoding="async" width="600" height="800" />
+        </div>
+        <figcaption>Meu porto seguro ❤️</figcaption>
+      </figure>
+
+      <!-- FOTO 7 — EDITE -->
+      <figure class="polaroid revelar" style="--rot:-3deg" tabindex="0" role="button">
+        <div class="polaroid-foto">
+          <img src="fotos/mini/foto7.jpg" data-grande="fotos/foto7.jpg" alt="Memória 7" loading="lazy" decoding="async" width="506" height="900" />
+        </div>
+        <figcaption>Nossa primeira foto 📸</figcaption>
+      </figure>
+
+      <!-- FOTO 8 — EDITE -->
+      <figure class="polaroid revelar" style="--rot:1.5deg" tabindex="0" role="button">
+        <div class="polaroid-foto">
+          <img src="fotos/mini/foto8.jpg" data-grande="fotos/foto8.jpg" alt="Memória 8" loading="lazy" decoding="async" width="506" height="900" />
+        </div>
+        <figcaption>Eu e Você 💕</figcaption>
+      </figure>
+
+      <!-- FOTO 9 — EDITE -->
+      <figure class="polaroid revelar" style="--rot:-2.5deg" tabindex="0" role="button">
+        <div class="polaroid-foto">
+          <img src="fotos/mini/foto9.jpg" data-grande="fotos/foto9.jpg" alt="Memória 9" loading="lazy" decoding="async" width="600" height="800" />
+        </div>
+        <figcaption>Você sempre presente... 🌏</figcaption>
+      </figure>
+
+      <!-- FOTO 10 — EDITE -->
+      <figure class="polaroid revelar" style="--rot:2.5deg" tabindex="0" role="button">
+        <div class="polaroid-foto">
+          <img src="fotos/mini/foto10.jpg" data-grande="fotos/foto10.jpg" alt="Memória 10" loading="lazy" decoding="async" width="600" height="543" />
+        </div>
+        <figcaption>Eu gosto demais dessa nossa foto 🌴</figcaption>
+      </figure>
+
+      <!-- FOTO 11 — EDITE -->
+      <figure class="polaroid revelar" style="--rot:-1.5deg" tabindex="0" role="button">
+        <div class="polaroid-foto">
+          <img src="fotos/mini/foto11.jpg" data-grande="fotos/foto11.jpg" alt="Memória 11" loading="lazy" decoding="async" width="506" height="900" />
+        </div>
+        <figcaption>Só músicas românticas pra você 🎶💕</figcaption>
+      </figure>
 
     </div>
   </section>
 
   <!-- ============================================================ -->
-  <!--  SEÇÃO 4: A CARTA ABERTA                                    -->
+  <!--  SEÇÃO 5: MOTIVOS PRA TE AMAR                               -->
+  <!--  (a lista de motivos fica no JavaScript, lá embaixo)        -->
+  <!-- ============================================================ -->
+  <section id="motivos">
+    <div class="secao-cabecalho">
+      <p class="secao-rotulo revelar">💙 Só alguns motivos 💙</p>
+      <h2 class="secao-titulo revelar desfoque revelar-delay-1">
+        Por que eu <em>te amo</em>?
+      </h2>
+      <p class="secao-dica revelar revelar-delay-2">toque na carta ou arraste pro lado 👉</p>
+    </div>
+
+    <div class="baralho revelar zoom revelar-delay-2">
+      <div class="cm-mover" id="cm-mover" tabindex="0" role="button" aria-label="Virar a carta e ver um motivo">
+        <div class="carta-motivo" id="carta-motivo">
+          <div class="cm-face cm-verso">
+            <span class="grande">♥</span>
+            <span class="chamada">Toque para virar</span>
+          </div>
+          <div class="cm-face cm-frente" aria-live="polite">
+            <span class="cm-num" id="cm-num">#1</span>
+            <p class="cm-texto" id="cm-texto"></p>
+            <span class="cm-coracao" aria-hidden="true">♥</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="motivos-contagem" id="motivos-contagem"></p>
+    <button type="button" class="botao" id="btn-motivo">Mais um motivo 💙</button>
+  </section>
+
+  <!-- ============================================================ -->
+  <!--  SEÇÃO 6: A CARTA ABERTA                                    -->
   <!-- ============================================================ -->
   <section id="carta">
     <div class="carta-wrapper">
       <div class="secao-cabecalho" style="margin-bottom: 2.5rem;">
         <p class="secao-rotulo revelar">💌 Palavras do Coração 💌</p>
-        <h2 class="secao-titulo revelar revelar-delay-1">
+        <h2 class="secao-titulo revelar desfoque revelar-delay-1">
           Minha <em>cartinha</em> pra você
         </h2>
       </div>
 
       <div class="carta-card revelar revelar-delay-2">
-        <div class="carta-icone">💙</div>
+        <div class="carta-icone" aria-hidden="true"><span>💙</span></div>
 
-        <!-- TÍTULO COM ANIMAÇÃO DE MÁQUINA DE ESCREVER -->
-        <!-- EDITE O TEXTO ABAIXO (o JS vai usar esse conteúdo) -->
+        <!-- TÍTULO COM MÁQUINA DE ESCREVER (o texto fica no JavaScript: TITULO_CARTA) -->
         <h3 class="carta-titulo" id="carta-titulo-texto">
           <span id="carta-titulo-digitando"></span><span class="cursor-digitando" id="cursor-carta"></span>
         </h3>
 
-        <div class="carta-divider">
+        <div class="carta-divider" aria-hidden="true">
           <span></span>
           <span class="florzinha">✦</span>
           <span></span>
@@ -1037,32 +2449,44 @@
         <!-- ======================================================= -->
         <!--  PARÁGRAFOS DA CARTA — EDITE LIVREMENTE ABAIXO         -->
         <!-- ======================================================= -->
-        <p class="carta-paragrafo" id="p1">
-          Desde de que nos conhecemos minha vida nunca mais foi a mesma... Você transformou minha vida em <strong>alegria e risadas leves</strong>, e o início
-          do nosso namoro foi apenas uma consequência, rs... Tu era caidinha por mim, <strong>e eu por você</strong>.
+        <p class="carta-paragrafo">
+          Sabe aquele dia em que a gente se conheceu? Eu não fazia ideia, mas ali estava começando a melhor parte da minha vida.
+          Você chegou leve, sorrindo, e foi transformando tudo em <strong>alegria e risadas leves</strong>. O namoro foi só uma
+          consequência, rs... tu era caidinha por mim, <strong>e eu por você</strong> (até hoje, viu?).
         </p>
 
-        <p class="carta-paragrafo" id="p2">
-          Cada momento nosso, são mais do que especiais. Cada <strong>sorriso</strong> seu, ilumina meus dias difíceis e cansativos...
-          Você é tudo pra mim, não consigo medir palavras pra dizer <strong>todo o meu amor por você</strong>. Nós vamos conseguir tudo juntos!
-          Com Deus na frente do barco vamos atrás de todos os nossos objetivos, formar <strong>nossa família linda</strong> e realizar nossos sonhos juntos!
+        <p class="carta-paragrafo">
+          Eu não precisei de data especial pra te escrever isso. Hoje não é aniversário, não é Dia dos Namorados, não tem nada
+          marcado no calendário... é só mais um dia comum. E é justamente por isso: é <strong>nos dias comuns</strong> que eu mais
+          percebo o quanto eu te amo. Numa conversa boba, num abraço demorado, no jeito que você ri das minhas besteiras.
         </p>
 
-        <p class="carta-paragrafo" id="p3">
-          Eu quero te agradecer por todos os nossos momentos, por sempre estar comigo nos momentos bons e ruins...
-          Pelo carinho que tem comigo, <strong>eu sou completamente apaixonado por vocêee</strong>!!
+        <p class="carta-paragrafo">
+          Cada <strong>sorriso</strong> seu ilumina meus dias difíceis e cansativos. Você é o meu porto seguro, a pessoa com quem
+          eu quero dividir tudo: as conquistas, os perrengues, as risadas e até os silêncios. Não existem palavras que meçam
+          <strong>todo o meu amor por você</strong>, mas eu vou passar a vida inteira tentando.
         </p>
 
-        <p class="carta-paragrafo" id="p4">
-          Enfim, feliz dia dos namorados, meu amor. <strong>Você merece o mundo inteiro</strong>, e eu vou te dar
-          cada pedacinho que eu puder. Te amo hoje, amanhã, e em todos os dias que ainda estão por vir, minha nenémzinha. 💙
+        <p class="carta-paragrafo">
+          Obrigado por estar comigo nos momentos bons e nos ruins, pelo carinho, pela paciência e por acreditar em mim.
+          Com Deus na frente do barco, a gente vai atrás de todos os nossos objetivos, vai formar <strong>nossa família linda</strong>
+          e realizar cada um dos nossos sonhos. Juntos.
+        </p>
+
+        <p class="carta-paragrafo">
+          Então, se algum dia você duvidar, volta aqui e lê de novo: <strong>eu sou completamente apaixonado por vocêee</strong>!!
+          Você merece o mundo inteiro, e eu vou te dar cada pedacinho que eu puder. Te amo hoje, amanhã e em todos os dias
+          que ainda estão por vir, minha nenémzinha. 💙
         </p>
 
         <!-- EDITE A ASSINATURA ABAIXO -->
-        <p class="carta-assinatura" id="carta-assinatura">
-          Com todo o meu amor,<br>
-          <em>Seu eterno Queridinho 💙</em>
-        </p>
+        <div class="carta-assinatura" id="carta-assinatura">
+          <span class="assin-linha1">Com todo o meu amor,</span>
+          <span class="assin-nome">Seu eterno Queridinho 💙</span>
+        </div>
+
+        <!-- P.S. (leva até a surpresa final) -->
+        <a href="#surpresa" class="carta-ps">P.S.: continua rolando... ainda tem uma coisinha pra você 🎁</a>
         <!-- ======================================================= -->
 
       </div>
@@ -1070,13 +2494,66 @@
   </section>
 
   <!-- ============================================================ -->
-  <!--  RODAPÉ                                                      -->
+  <!--  SEÇÃO 7: SURPRESA FINAL                                    -->
+  <!--  ↓ EDITE A PERGUNTA E A RESPOSTA                            -->
+  <!--  (os textos do botão "Não" ficam no JavaScript)             -->
   <!-- ============================================================ -->
-  <footer>
-    <span class="footer-coracao">💙</span>
+  <section id="surpresa">
+    <p class="secao-rotulo revelar">🎁 Uma última coisinha 🎁</p>
+    <h2 class="surpresa-pergunta revelar desfoque revelar-delay-1">Você me <em>ama</em>?</h2>
+
+    <div class="surpresa-area revelar revelar-delay-2" id="surpresa-area">
+      <button type="button" class="botao botao-sim" id="btn-sim">Sim 💙</button>
+      <button type="button" class="botao botao-nao" id="btn-nao">Não</button>
+    </div>
+
+    <div class="surpresa-resposta" id="surpresa-resposta" hidden>
+      <p class="resposta-titulo">Eu sabia! 💙</p>
+      <p class="resposta-texto">Eu também te amo, hoje e sempre.</p>
+      <a href="#hero" class="botao">Voltar ao início ↑</a>
+    </div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!--  RODAPÉ (toque 5 vezes no coração para ver o segredo)      -->
+  <!-- ============================================================ -->
+  <footer id="rodape">
+    <button type="button" class="footer-coracao" id="coracao-segredo" aria-label="Coração"><span>💙</span></button>
     <!-- EDITE O TEXTO DO RODAPÉ ABAIXO -->
     <p class="footer-texto">Feito com muito amor · Para você, neném 💙</p>
+    <p class="footer-dica" id="dica-segredo">psiu... tem um segredo aqui 🤫</p>
   </footer>
+
+  <!-- ============================================================ -->
+  <!--  MENSAGEM SECRETA — EDITE O TEXTO ABAIXO                    -->
+  <!-- ============================================================ -->
+  <div class="modal" id="segredo" role="dialog" aria-modal="true" aria-labelledby="segredo-titulo">
+    <div class="modal-caixa">
+      <div class="modal-icone" aria-hidden="true">🔐💙</div>
+      <h3 class="modal-titulo" id="segredo-titulo">Você achou o segredo!</h3>
+      <p class="modal-texto">
+        Se você chegou até aqui, é porque é curiosa do jeitinho que eu amo. 😄
+        Então aqui vai um segredo: eu penso em você bem mais do que eu admito,
+        e toda vez que eu vejo uma foto nossa eu fico sorrindo igual bobo.
+        Te amo infinitamente. 💙
+      </p>
+      <button type="button" class="botao" id="segredo-fechar">Fechar 💙</button>
+    </div>
+  </div>
+
+  <!-- Foto em tela cheia (preenchida pelo JavaScript) -->
+  <div id="lightbox" role="dialog" aria-modal="true" aria-label="Foto ampliada">
+    <div class="lb-fundo"></div>
+    <div class="lb-palco" id="lb-palco"><img class="lb-img" id="lb-img" alt="" draggable="false" /></div>
+    <div class="lb-rodape">
+      <p class="lb-legenda" id="lb-legenda"></p>
+      <span class="lb-contagem" id="lb-contagem"></span>
+    </div>
+    <p class="lb-dica" id="lb-dica">👈 arraste para o lado 👉</p>
+    <button type="button" class="lb-botao lb-fechar" id="lb-fechar" aria-label="Fechar">✕</button>
+    <button type="button" class="lb-botao lb-ant" id="lb-ant" aria-label="Foto anterior">‹</button>
+    <button type="button" class="lb-botao lb-prox" id="lb-prox" aria-label="Próxima foto">›</button>
+  </div>
 
   <!-- ============================================================ -->
   <!--  JAVASCRIPT                                                  -->
@@ -1094,144 +2571,739 @@
     const INICIO_MIN   = 0;
 
     // TÍTULO DA CARTA (será digitado com efeito máquina de escrever)
-    const TITULO_CARTA = "Para o amor da minha vida...";
+    const TITULO_CARTA = "Pra você, meu amor...";
+
+    // MOTIVOS PRA TE AMAR — um por linha, entre aspas e com vírgula no final
+    const MOTIVOS = [
+      "Seu sorriso, que ilumina até os meus dias mais cansativos.",
+      "Você transformou a minha vida em alegria e risadas leves.",
+      "Você é o meu porto seguro.",
+      "Você está comigo nos dias bons e também nos ruins.",
+      "O carinho que você tem comigo, em cada detalhe.",
+      "A nossa fé, e o jeito que a gente coloca Deus na frente do barco.",
+      "Os sonhos que a gente sonha juntos.",
+      "Seu abraço, que tem cheiro de casa.",
+      "Com você, qualquer passeio vira história.",
+      "Você fica linda até nas fotos que acha que não ficou.",
+      "Você me faz querer ser alguém melhor todos os dias.",
+      "Com você, até o silêncio é bom.",
+      "Nossas músicas românticas, e você cantando junto. 🎶",
+      "Você é presente até quando está longe. 🌏",
+      "Porque eu te escolheria de novo, todos os dias.",
+    ];
+    // Carta que aparece depois do último motivo
+    const MOTIVO_FINAL = "E mais um milhão de motivos que não cabem aqui... 💙";
+
+    // SURPRESA FINAL — textos que o botão "Não" vai mostrando enquanto foge
+    const TEXTOS_NAO = ["Não", "Tem certeza?", "Pensa bem... 🤔", "Errou o botão 😜", "Tenta de novo", "Impossível 😏", "Desiste 😂"];
+    // Depois de fugir todas essas vezes, o "Não" se rende e vira:
+    const TEXTO_NAO_FINAL = "Tá bom, sim 💙";
 
     /* ==============================================================
-     *  1. PARTÍCULAS DE FUNDO (Corações e estrelas)
+     *  0. UTILITÁRIOS (não precisa mexer daqui pra baixo)
      * ============================================================ */
-    (function() {
-      const canvas = document.getElementById('particulas-canvas');
-      const ctx    = canvas.getContext('2d');
+    const reduzMovimento = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const $  = (sel, raiz = document) => raiz.querySelector(sel);
+    const $$ = (sel, raiz = document) => Array.from(raiz.querySelectorAll(sel));
+    const limitar = (v, min, max) => Math.min(max, Math.max(min, v));
+    const CORES_CORACAO = ['#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe', '#2563eb', '#ffffff'];
+    const sortear = (lista) => lista[Math.floor(Math.random() * lista.length)];
 
-      let particulas = [];
-      let largura, altura;
+    function vibrar(padrao) {
+      try { if (navigator.vibrate) navigator.vibrate(padrao); } catch (e) { /* sem vibração */ }
+    }
 
-      function redimensionar() {
-        largura = canvas.width  = window.innerWidth;
-        altura  = canvas.height = window.innerHeight;
+    // Trava/destrava a rolagem da página (envelope, foto aberta, segredo)
+    let travas = document.documentElement.classList.contains('travado') ? 1 : 0;
+    function travar() { travas++; document.documentElement.classList.add('travado'); }
+    function destravar() {
+      travas = Math.max(0, travas - 1);
+      if (!travas) document.documentElement.classList.remove('travado');
+    }
+
+    // Coração desenhado no canvas
+    function desenharCoracao(ctx, x, y, tamanho, cor, alfa, rotacao = 0) {
+      ctx.save();
+      ctx.globalAlpha = alfa;
+      ctx.fillStyle   = cor;
+      ctx.translate(x, y);
+      ctx.rotate(rotacao);
+      ctx.scale(tamanho, tamanho);
+      ctx.beginPath();
+      ctx.moveTo(0, -0.3);
+      ctx.bezierCurveTo(0, -0.7, -0.7, -0.7, -0.7, -0.2);
+      ctx.bezierCurveTo(-0.7,  0.2, -0.3,  0.5,  0,  0.7);
+      ctx.bezierCurveTo( 0.3,  0.5,  0.7,  0.2,  0.7, -0.2);
+      ctx.bezierCurveTo( 0.7, -0.7,  0,   -0.7,  0,  -0.3);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Explosão de coraçõezinhos a partir de um ponto da tela
+    function explodirCoracoes(x, y, quantidade = 16, raio = 120) {
+      if (reduzMovimento) return;
+      const coracoes = [];
+      for (let i = 0; i < quantidade; i++) {
+        const c = document.createElement('span');
+        c.className = 'faisca';
+        c.textContent = '♥';
+        c.style.left = x + 'px';
+        c.style.top  = y + 'px';
+        c.style.color = sortear(CORES_CORACAO);
+        c.style.fontSize = (10 + Math.random() * 16) + 'px';
+        document.body.appendChild(c);
+        coracoes.push(c);
+      }
+      coracoes.forEach(c => {
+        const ang  = Math.random() * Math.PI * 2;
+        const dist = raio * (0.4 + Math.random() * 0.8);
+        const dx = Math.cos(ang) * dist;
+        const dy = Math.sin(ang) * dist - 30;
+        const rot = (Math.random() - 0.5) * 120;
+        const anim = c.animate([
+          { transform: 'translate(0, 0) scale(0)', opacity: 1 },
+          { transform: `translate(${dx * 0.7}px, ${dy * 0.7}px) scale(1.1) rotate(${rot / 2}deg)`, opacity: 1, offset: 0.55 },
+          { transform: `translate(${dx}px, ${dy + 45}px) scale(0.6) rotate(${rot}deg)`, opacity: 0 }
+        ], { duration: 900 + Math.random() * 600, easing: 'cubic-bezier(.2,.7,.3,1)' });
+        anim.onfinish = () => c.remove();
+      });
+    }
+
+    // Chuva de corações na tela inteira
+    function chuvaDeCoracoes(duracao = 4500) {
+      if (reduzMovimento) return;
+      const canvas = document.createElement('canvas');
+      canvas.className = 'chuva';
+      document.body.appendChild(canvas);
+      const ctx = canvas.getContext('2d');
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const w = window.innerWidth, h = window.innerHeight;
+      canvas.width = w * dpr; canvas.height = h * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const itens = [];
+      const inicio = performance.now();
+      const maximo = w < 600 ? 110 : 180;
+
+      function quadro(agora) {
+        const passou = agora - inicio;
+        if (passou < duracao && itens.length < maximo) {
+          for (let i = 0; i < 3; i++) {
+            itens.push({
+              x: Math.random() * w,
+              y: -30 - Math.random() * 60,
+              vy: 2 + Math.random() * 3.5,
+              vx: (Math.random() - 0.5) * 1.2,
+              fase: Math.random() * Math.PI * 2,
+              tam: 8 + Math.random() * 16,
+              cor: sortear(CORES_CORACAO),
+              rot: (Math.random() - 0.5) * 0.8,
+              vr: (Math.random() - 0.5) * 0.04,
+            });
+          }
+        }
+        ctx.clearRect(0, 0, w, h);
+        for (let i = itens.length - 1; i >= 0; i--) {
+          const c = itens[i];
+          c.fase += 0.04;
+          c.y += c.vy;
+          c.x += c.vx + Math.sin(c.fase) * 0.8;
+          c.rot += c.vr;
+          if (c.y > h + 40) { itens.splice(i, 1); continue; }
+          desenharCoracao(ctx, c.x, c.y, c.tam, c.cor, 0.9, c.rot);
+        }
+        if (passou > duracao && itens.length === 0) { canvas.remove(); return; }
+        requestAnimationFrame(quadro);
+      }
+      requestAnimationFrame(quadro);
+    }
+
+    /* ==============================================================
+     *  1. ABERTURA — O ENVELOPE (sequência cinematográfica)
+     * ============================================================ */
+    (function () {
+      const abertura = $('#abertura');
+
+      function liberarSite() {
+        if (document.body.classList.contains('aberto')) return;
+        document.body.classList.add('aberto');
+        destravar();
       }
 
-      // Corações SVG desenhados em Canvas
-      function desenharCoracao(ctx, x, y, tamanho, cor, alfa) {
+      if (!abertura || location.hash === '#sem-abertura') {
+        if (abertura) abertura.remove();
+        liberarSite();
+        return;
+      }
+
+      if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+      window.scrollTo(0, 0);
+
+      const envelope = $('#envelope');
+      const inclina  = $('#envelope-inclina');
+      const cena     = $('.envelope-cena', abertura);
+      const carta    = $('#env-carta');
+      const linhas   = $$('.carta-l1, .carta-l2', carta);
+      const selo     = $('.env-selo', envelope);
+      const espera   = ms => new Promise(r => setTimeout(r, ms));
+      const animar   = (el, quadros, opcoes) => el.animate(quadros, Object.assign({ fill: 'forwards' }, opcoes));
+
+      if (window.matchMedia('(hover: hover)').matches) $('.abertura-dica .texto', abertura).textContent = 'Clique para abrir';
+
+      // Frase de cima: entra palavra por palavra
+      let n = 0;
+      $$('.ab-linha', abertura).forEach(linha => (function percorrer(no) {
+        Array.from(no.childNodes).forEach(filho => {
+          if (filho.nodeType === Node.TEXT_NODE) {
+            const frag = document.createDocumentFragment();
+            filho.textContent.split(/(\s+)/).forEach(parte => {
+              if (!parte) return;
+              if (/^\s+$/.test(parte)) { frag.appendChild(document.createTextNode(' ')); return; }
+              const s = document.createElement('span');
+              s.className = 'ab-palavra';
+              s.style.setProperty('--i', n++);
+              s.textContent = parte;
+              frag.appendChild(s);
+            });
+            no.replaceChild(frag, filho);
+          } else if (filho.nodeType === Node.ELEMENT_NODE) {
+            percorrer(filho);
+          }
+        });
+      })(linha));
+
+      // Céu: estrelas e corações em três profundidades
+      const pequeno = window.innerWidth < 600;
+      for (let i = 0; i < (pequeno ? 34 : 70); i++) {
+        const s = document.createElement('span');
+        s.className = 'ab-estrela';
+        s.style.left = (Math.random() * 100) + '%';
+        s.style.top  = (Math.random() * 100) + '%';
+        s.style.setProperty('--t', (1 + Math.random() * 1.8).toFixed(1) + 'px');
+        s.style.animationDuration = (2 + Math.random() * 3) + 's';
+        s.style.animationDelay = (-Math.random() * 5) + 's';
+        abertura.prepend(s);
+      }
+      [
+        ['longe', pequeno ? 10 : 16,  8, 13, 17, 24, 0.18],
+        ['meio',  pequeno ? 7  : 12, 14, 20, 11, 15, 0.28],
+        ['perto', pequeno ? 4  : 7,  22, 30,  8, 11, 0.38],
+      ].forEach(([camada, qtd, tMin, tMax, dMin, dMax, alfa]) => {
+        for (let i = 0; i < qtd; i++) {
+          const c = document.createElement('span');
+          c.className = 'ab-coracao ' + camada;
+          c.textContent = '♥';
+          c.style.left = (Math.random() * 100) + '%';
+          c.style.fontSize = (tMin + Math.random() * (tMax - tMin)) + 'px';
+          c.style.setProperty('--alfa', alfa);
+          c.style.setProperty('--x', ((Math.random() - 0.5) * 80).toFixed(0) + 'px');
+          c.style.animationDuration = (dMin + Math.random() * (dMax - dMin)) + 's';
+          c.style.animationDelay = (-Math.random() * dMax) + 's';
+          abertura.prepend(c);
+        }
+      });
+
+      // Inclinação 3D: segue o mouse (computador) ou o movimento do celular (Android)
+      function inclinar(x, y) { inclina.style.transform = `perspective(900px) rotateY(${x * 14}deg) rotateX(${-y * 12}deg)`; }
+      const aoMover = e => {
+        if (e.pointerType !== 'mouse') return;
+        inclinar(limitar((e.clientX / window.innerWidth - 0.5) * 2, -1, 1), limitar((e.clientY / window.innerHeight - 0.5) * 2, -1, 1));
+      };
+      const aoGirar = e => {
+        if (e.gamma == null || e.beta == null) return;
+        inclinar(limitar(e.gamma / 30, -1, 1), limitar((e.beta - 45) / 30, -1, 1));
+      };
+      if (!reduzMovimento) {
+        abertura.addEventListener('pointermove', aoMover);
+        if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission !== 'function') {
+          window.addEventListener('deviceorientation', aoGirar);
+        }
+      }
+      function pararInclinacao() {
+        abertura.removeEventListener('pointermove', aoMover);
+        window.removeEventListener('deviceorientation', aoGirar);
+        inclina.style.transform = '';
+      }
+
+      // Formato do coração (o mesmo da capa), usado para abrir o "portal"
+      const PONTOS = [[50, 88], [20, 66], [2, 48], [2, 28], [2, 12], [14, 2], [28, 2], [38, 2], [46, 8], [50, 16],
+                      [54, 8], [62, 2], [72, 2], [86, 2], [98, 12], [98, 28], [98, 48], [80, 66], [50, 88]];
+      function caminhoPortal(cx, cy, tamanho) {
+        const k = tamanho / 100;
+        const w = window.innerWidth, h = window.innerHeight;
+        const p = PONTOS.map(([x, y]) => `${(cx + (x - 50) * k).toFixed(1)} ${(cy + (y - 45) * k).toFixed(1)}`);
+        let d = `M-20 -20H${w + 20}V${h + 20}H-20Z M${p[0]}`;
+        for (let i = 1; i < p.length; i += 3) d += ` C${p[i]} ${p[i + 1]} ${p[i + 2]}`;
+        return d + 'Z';
+      }
+      const temPortal = window.CSS && CSS.supports('clip-path', 'path(evenodd, "M0 0H1V1Z")');
+
+      async function sequencia() {
+        abertura.classList.add('abrindo');
+        const texto = $('.abertura-texto', abertura);
+        const dica  = $('.abertura-dica', abertura);
+        [texto, dica].forEach(el => animar(el, [{ opacity: 0, transform: 'translateY(-18px)', filter: 'blur(6px)' }], { duration: 600, easing: 'ease-out' }));
+
+        // 1. O envelope "afunda" com o toque, saindo de onde estava (sem tranco)
+        const tCena = getComputedStyle(cena).transform;
+        const oCena = getComputedStyle(cena).opacity;
+        cena.style.animation = 'none';
+        animar(cena, [{ transform: tCena, opacity: oCena }, { transform: 'none', opacity: 1 }], { duration: 700, easing: 'cubic-bezier(.2,.8,.2,1)' });
+        const tEnv = getComputedStyle(envelope).transform;
+        envelope.style.animation = 'none';
+        animar(envelope, [
+          { transform: tEnv },
+          { transform: 'scale(0.92)', offset: 0.35 },
+          { transform: 'scale(1.02)', offset: 0.7 },
+          { transform: 'none' }
+        ], { duration: 650, easing: 'ease-out' });
+
+        // 2. O selo se parte em duas metades
+        await espera(200);
+        const tSelo = getComputedStyle(selo).transform;
+        selo.style.animation = 'none';
+        selo.style.transform = tSelo;
+        animar(selo, [{ transform: 'translate(-50%, -50%) scale(1)' }], { duration: 250 });
+        animar($('.selo-sombra', selo), [{ opacity: 0 }], { duration: 300 });
+        $$('.selo-metade', selo).forEach((metade, i) => {
+          const lado = i === 0 ? -1 : 1;
+          animar(metade, [
+            { transform: 'none', opacity: 1, easing: 'ease-out' },
+            { transform: `translate(${lado * 10}px, -12px) rotate(${lado * 16}deg)`, opacity: 1, offset: 0.3, easing: 'ease-in' },
+            { transform: `translate(${lado * 75}px, 120px) rotate(${lado * 100}deg)`, opacity: 0 }
+          ], { duration: 950 });
+        });
+        const rs = selo.getBoundingClientRect();
+        explodirCoracoes(rs.left + rs.width / 2, rs.top + rs.height / 2, 10, 70);
+
+        // 3. A aba abre devagar e uma luz vaza de dentro
+        await espera(280);
+        animar($('.env-aba', envelope), [
+          { transform: 'rotateX(0deg)',   filter: 'brightness(1)',    zIndex: 4 },
+          { transform: 'rotateX(90deg)',  filter: 'brightness(0.6)',  zIndex: 4, offset: 0.5 },
+          { transform: 'rotateX(180deg)', filter: 'brightness(0.85)', zIndex: 1 }
+        ], { duration: 1000, easing: 'cubic-bezier(.55,0,.3,1)' });
+        animar($('.env-luz', envelope), [
+          { transform: 'translate(-50%, -50%) scale(0.3)', opacity: 0 },
+          { transform: 'translate(-50%, -50%) scale(1)',   opacity: 1 }
+        ], { duration: 1500, delay: 350, easing: 'cubic-bezier(.2,.8,.2,1)' });
+
+        // 4. A carta sobe com um balanço e a mensagem é escrita à mão
+        await espera(650);
+        // Em telas baixas (celular deitado), o envelope desce junto para a carta caber inteira
+        const rEnv = envelope.getBoundingClientRect();
+        const topoCarta = carta.getBoundingClientRect().top - carta.offsetHeight * 1.12;
+        const descer = Math.max(0, Math.min(12 - topoCarta, window.innerHeight - 8 - rEnv.bottom));
+        if (descer > 0) {
+          animar(cena, [{ transform: 'none' }, { transform: `translateY(${descer}px)` }], { duration: 1200, easing: 'cubic-bezier(.22,1,.36,1)' });
+        }
+        animar(carta, [
+          { transform: 'translate(0px, 0px) translateY(0%) rotate(0deg) scale(1)' },
+          { transform: 'translate(0px, 0px) translateY(-112%) rotate(-3deg) scale(1)' }
+        ], { duration: 1200, easing: 'cubic-bezier(.22,1.25,.36,1)' });
+        await espera(500);
+        animar(linhas[0], [{ clipPath: 'inset(0 0% 0 0)' }], { duration: 900, easing: 'cubic-bezier(.6,0,.4,1)' });
+        await espera(650);
+        animar(linhas[1], [{ clipPath: 'inset(0 0% 0 0)' }], { duration: 800, easing: 'cubic-bezier(.6,0,.4,1)' });
+        await espera(1150);
+
+        // 5. A "câmera" entra na carta
+        carta.style.zIndex = 6;
+        const rc = carta.getBoundingClientRect();
+        const escala = Math.max(window.innerWidth / carta.offsetWidth, window.innerHeight / carta.offsetHeight) * 1.25;
+        const dx = window.innerWidth / 2 - (rc.left + rc.width / 2);
+        const dy = window.innerHeight / 2 - (rc.top + rc.height / 2);
+        linhas.forEach(l => animar(l, [{ opacity: 0 }], { duration: 400, delay: 150 }));
+        animar($('.carta-tinta', carta), [{ opacity: 1 }], { duration: 900, easing: 'ease-in' });
+        $$('.env-fundo, .env-frente, .env-aba, .env-selo, .env-luz', envelope).forEach(p => animar(p, [{ opacity: 0 }], { duration: 650, easing: 'ease-out' }));
+        abertura.getAnimations({ subtree: true }).forEach(a => {
+          if (a.animationName !== 'ab-subir') return;
+          if (a.updatePlaybackRate) a.updatePlaybackRate(3.2); else a.playbackRate = 3.2;
+        });
+        await animar(carta, [
+          { transform: 'translate(0px, 0px) translateY(-112%) rotate(-3deg) scale(1)' },
+          { transform: `translate(${dx}px, ${dy}px) translateY(-112%) rotate(0deg) scale(${escala})` }
+        ], { duration: 1050, easing: 'cubic-bezier(.7,0,.2,1)' }).finished;
+
+        // 6. Um portal em forma de coração se abre e revela o site
+        liberarSite();
+        if (!temPortal) {
+          await animar(abertura, [{ opacity: 0 }], { duration: 900, easing: 'ease-out' }).finished;
+          return;
+        }
+        abertura.style.background = '#dbeafe';      // mesma cor da carta que cobriu a tela
+        abertura.classList.add('portal');
+        Array.from(abertura.children).forEach(el => { el.style.visibility = 'hidden'; });
+
+        const hr = $('#hero-coracao').getBoundingClientRect();
+        const cx = hr.left + hr.width / 2;
+        const cy = hr.top + hr.height / 2;
+        const fim = Math.max(window.innerWidth, window.innerHeight) * 3.2;
+        const duracao = 1600;
+        const suaviza = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        explodirCoracoes(cx, cy, 34, 260);
+        setTimeout(() => explodirCoracoes(cx, cy, 24, 420), 450);
+        vibrar(30);
+        await new Promise(fimPortal => {
+          const t0 = performance.now();
+          (function quadro(agora) {
+            const k = limitar((agora - t0) / duracao, 0, 1);
+            abertura.style.clipPath = `path(evenodd, '${caminhoPortal(cx, cy, Math.max(0.5, fim * suaviza(k)))}')`;
+            abertura.style.opacity = k > 0.75 ? 1 - (k - 0.75) / 0.25 : 1;
+            if (k < 1) requestAnimationFrame(quadro); else fimPortal();
+          })(t0);
+        });
+      }
+
+      let abriu = false;
+      function abrir() {
+        if (abriu) return;
+        abriu = true;
+        vibrar([15, 50, 25]);
+        pararInclinacao();
+        if (reduzMovimento) {
+          liberarSite();
+          animar(abertura, [{ opacity: 0 }], { duration: 400 }).finished.then(() => abertura.remove());
+          return;
+        }
+        sequencia()
+          .catch(() => { liberarSite(); })
+          .finally(() => abertura.remove());
+      }
+
+      abertura.addEventListener('click', abrir);
+      abertura.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+    })();
+
+    /* ==============================================================
+     *  2. PARTÍCULAS DE FUNDO (Corações e estrelas)
+     * ============================================================ */
+    (function () {
+      const canvas = $('#particulas-canvas');
+      const ctx    = canvas.getContext('2d');
+      const dpr    = Math.min(window.devicePixelRatio || 1, 2);
+
+      let particulas = [];
+      let estrelas   = [];
+      let largura = 0, altura = 0, alturaCanvas = 0;
+
+      function ajustarCanvas() {
+        largura = window.innerWidth;
+        altura  = window.innerHeight;
+        // Só aumenta a altura (a barra do navegador do celular some/volta ao rolar)
+        alturaCanvas = Math.max(altura, alturaCanvas);
+        canvas.width  = largura * dpr;
+        canvas.height = alturaCanvas * dpr;
+        canvas.style.height = alturaCanvas + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+
+      function criarParticula(espalhar) {
+        const tipos = ['coração', 'coração', 'estrela', 'ponto'];
+        const cores = ['#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe', '#1d4ed8', '#2563eb', '#ffffff'];
+        return {
+          x:       Math.random() * largura,
+          y:       espalhar ? Math.random() * alturaCanvas : alturaCanvas + 30 + Math.random() * 60,
+          vx:      (Math.random() - 0.5) * 0.4,
+          vy:      -(Math.random() * 0.6 + 0.2),
+          tamanho: Math.random() * 10 + 4,
+          cor:     sortear(cores),
+          alfa:    Math.random() * 0.35 + 0.05,
+          tipo:    sortear(tipos),
+          rotacao: Math.random() * Math.PI * 2,
+          rotVel:  (Math.random() - 0.5) * 0.02,
+          fase:    Math.random() * Math.PI * 2,
+        };
+      }
+
+      function iniciar() {
+        const area = largura * alturaCanvas;
+        const qtd  = Math.round(limitar(area / 12000, 18, 60));
+        particulas = Array.from({ length: qtd }, () => criarParticula(true));
+        estrelas = Array.from({ length: Math.round(limitar(area / 9000, 30, 90)) }, () => ({
+          x: Math.random() * largura,
+          y: Math.random() * alturaCanvas,
+          r: Math.random() * 1.1 + 0.3,
+          fase: Math.random() * Math.PI * 2,
+          vel: 0.01 + Math.random() * 0.025,
+        }));
+      }
+
+      function desenharEstrela4(p) {
         ctx.save();
-        ctx.globalAlpha = alfa;
-        ctx.fillStyle   = cor;
-        ctx.translate(x, y);
-        ctx.scale(tamanho, tamanho);
+        ctx.globalAlpha = p.alfa;
+        ctx.fillStyle   = p.cor;
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rotacao);
         ctx.beginPath();
-        // Bezier do coração
-        ctx.moveTo(0, -0.3);
-        ctx.bezierCurveTo(0, -0.7, -0.7, -0.7, -0.7, -0.2);
-        ctx.bezierCurveTo(-0.7,  0.2, -0.3,  0.5,  0,  0.7);
-        ctx.bezierCurveTo( 0.3,  0.5,  0.7,  0.2,  0.7, -0.2);
-        ctx.bezierCurveTo( 0.7, -0.7,  0,   -0.7,  0,  -0.3);
+        for (let j = 0; j < 8; j++) {
+          const ang = (j * Math.PI) / 4;
+          const r   = j % 2 === 0 ? p.tamanho * 0.5 : p.tamanho * 0.2;
+          if (j === 0) ctx.moveTo(Math.cos(ang) * r, Math.sin(ang) * r);
+          else         ctx.lineTo(Math.cos(ang) * r, Math.sin(ang) * r);
+        }
+        ctx.closePath();
         ctx.fill();
         ctx.restore();
       }
 
-      function criarParticula() {
-        const tipos  = ['coração', 'estrela', 'ponto'];
-        const cores  = [
-          '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe',
-          '#1d4ed8', '#2563eb', '#ffffff'
-        ];
-        return {
-          x:      Math.random() * largura,
-          y:      Math.random() * altura + altura,
-          vx:     (Math.random() - 0.5) * 0.4,
-          vy:     -(Math.random() * 0.6 + 0.2),
-          tamanho: Math.random() * 10 + 4,
-          cor:    cores[Math.floor(Math.random() * cores.length)],
-          alfa:   Math.random() * 0.35 + 0.05,
-          tipo:   tipos[Math.floor(Math.random() * tipos.length)],
-          rotacao: Math.random() * Math.PI * 2,
-          rotVel:  (Math.random() - 0.5) * 0.02,
-        };
-      }
+      function quadro() {
+        ctx.clearRect(0, 0, largura, alturaCanvas);
 
-      function iniciarParticulas() {
-        particulas = [];
-        const qtd = Math.min(Math.floor(largura / 16), 70);
-        for (let i = 0; i < qtd; i++) {
-          const p = criarParticula();
-          p.y = Math.random() * altura; // distribuir na tela inicialmente
-          particulas.push(p);
-        }
-      }
-
-      function animar() {
-        ctx.clearRect(0, 0, largura, altura);
+        // Estrelinhas cintilando
+        ctx.fillStyle = '#dbeafe';
+        estrelas.forEach(s => {
+          s.fase += s.vel;
+          ctx.globalAlpha = 0.15 + (Math.sin(s.fase) + 1) * 0.3;
+          ctx.beginPath();
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        ctx.globalAlpha = 1;
 
         particulas.forEach((p, i) => {
-          p.x  += p.vx;
-          p.y  += p.vy;
+          p.fase += 0.01;
+          p.x += p.vx + Math.sin(p.fase) * 0.15;
+          p.y += p.vy;
           p.rotacao += p.rotVel;
 
-          // Reaparecer na base ao sair pelo topo
-          if (p.y < -50) {
-            particulas[i] = criarParticula();
-            return;
-          }
+          if (p.y < -50) { particulas[i] = criarParticula(false); return; }
 
           if (p.tipo === 'coração') {
             desenharCoracao(ctx, p.x, p.y, p.tamanho, p.cor, p.alfa);
           } else if (p.tipo === 'estrela') {
-            ctx.save();
-            ctx.globalAlpha = p.alfa;
-            ctx.fillStyle   = p.cor;
-            ctx.translate(p.x, p.y);
-            ctx.rotate(p.rotacao);
-            ctx.beginPath();
-            const pts = 4;
-            for (let j = 0; j < pts * 2; j++) {
-              const ang = (j * Math.PI) / pts;
-              const r   = j % 2 === 0 ? p.tamanho * 0.5 : p.tamanho * 0.2;
-              j === 0
-                ? ctx.moveTo(Math.cos(ang) * r, Math.sin(ang) * r)
-                : ctx.lineTo(Math.cos(ang) * r, Math.sin(ang) * r);
-            }
-            ctx.closePath();
-            ctx.fill();
-            ctx.restore();
+            desenharEstrela4(p);
           } else {
-            ctx.save();
             ctx.globalAlpha = p.alfa;
             ctx.fillStyle   = p.cor;
             ctx.beginPath();
             ctx.arc(p.x, p.y, p.tamanho * 0.25, 0, Math.PI * 2);
             ctx.fill();
-            ctx.restore();
+            ctx.globalAlpha = 1;
           }
         });
 
-        requestAnimationFrame(animar);
+        if (!reduzMovimento) requestAnimationFrame(quadro);
       }
 
-      redimensionar();
-      iniciarParticulas();
-      animar();
+      ajustarCanvas();
+      iniciar();
+      quadro();
+
+      let timer;
       window.addEventListener('resize', () => {
-        redimensionar();
-        iniciarParticulas();
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          const larguraAntiga = largura;
+          const alturaAntiga  = alturaCanvas;
+          if (window.innerWidth === larguraAntiga && window.innerHeight <= alturaAntiga) return;
+          ajustarCanvas();
+          if (Math.abs(largura - larguraAntiga) > 40) iniciar();
+          if (reduzMovimento) quadro();
+        }, 200);
       });
     })();
 
     /* ==============================================================
-     *  2. CONTADOR DE TEMPO REAL
+     *  3. CAPA — TÍTULO, TOQUE NO CORAÇÃO E INCLINAÇÃO 3D
      * ============================================================ */
-    (function() {
+    (function () {
+      // Separa as linhas do título em palavras (entram uma a uma)
+      $$('.hero-titulo .linha').forEach(linha => {
+        const palavras = linha.textContent.trim().split(/\s+/);
+        linha.textContent = '';
+        palavras.forEach((p, i) => {
+          if (i) linha.appendChild(document.createTextNode(' '));
+          const s = document.createElement('span');
+          s.className = 'palavra';
+          s.style.setProperty('--i', i);
+          s.textContent = p;
+          linha.appendChild(s);
+        });
+      });
+
+      const hero    = $('#hero');
+      const coracao = $('#hero-coracao');
+      const inclina = $('.coracao-inclina', coracao);
+
+      // Tocar no coração: ele aperta e solta coraçõezinhos
+      coracao.addEventListener('click', e => {
+        explodirCoracoes(e.clientX, e.clientY, 18, 150);
+        vibrar(20);
+        if (reduzMovimento) return;
+        const base = inclina.style.transform || '';
+        inclina.animate([
+          { transform: base + ' scale(1)' },
+          { transform: base + ' scale(0.9)' },
+          { transform: base + ' scale(1.06)' },
+          { transform: base + ' scale(1)' }
+        ], { duration: 550, easing: 'ease-out' });
+      });
+
+      // No computador, o coração inclina seguindo o mouse
+      if (!reduzMovimento && window.matchMedia('(hover: hover)').matches) {
+        hero.addEventListener('pointermove', e => {
+          if (e.pointerType !== 'mouse') return;
+          const r = coracao.getBoundingClientRect();
+          const x = limitar((e.clientX - (r.left + r.width / 2)) / r.width, -1, 1);
+          const y = limitar((e.clientY - (r.top + r.height / 2)) / r.height, -1, 1);
+          inclina.style.transform = `rotateY(${x * 12}deg) rotateX(${-y * 10}deg)`;
+        });
+        hero.addEventListener('pointerleave', () => { inclina.style.transform = ''; });
+      }
+    })();
+
+    /* ==============================================================
+     *  4. ROLAGEM: progresso, menu, parallax e linha do tempo
+     * ============================================================ */
+    (function () {
+      const barra        = $('#progresso .barra');
+      const menu         = $('#menu');
+      const heroCoracao  = $('#hero-coracao');
+      const timeline     = $('#timeline');
+      const progresso    = $('#timeline-progresso');
+      const cabeca       = $('#timeline-cabeca');
+      const marcos       = $$('.marco').map(el => ({ el, ponto: $('.marco-ponto', el), topo: 0 }));
+
+      let ultimoY = window.scrollY;
+      let agendado = false;
+
+      function medir() {
+        const base = timeline.getBoundingClientRect().top;
+        marcos.forEach(m => {
+          const r = m.ponto.getBoundingClientRect();
+          m.topo = r.top - base + r.height / 2;
+        });
+      }
+
+      function atualizar() {
+        agendado = false;
+        const y  = window.scrollY;
+        const vh = window.innerHeight;
+        const max = Math.max(1, document.documentElement.scrollHeight - vh);
+
+        barra.style.transform = `translateX(${(limitar(y / max, 0, 1) - 1) * 100}%)`;
+
+        // Menu some ao descer e volta ao subir
+        if (y > ultimoY + 6 && y > 320) menu.classList.add('escondido');
+        else if (y < ultimoY - 6 || y < 120) menu.classList.remove('escondido');
+        ultimoY = y;
+
+        // Parallax da capa: o coração desce mais devagar e diminui um pouquinho
+        if (!reduzMovimento && y < vh * 1.3) {
+          heroCoracao.style.transform = `translate3d(0, ${y * 0.28}px, 0) scale(${1 - limitar(y / vh, 0, 1) * 0.15})`;
+        }
+
+        // Linha do tempo que se desenha
+        const r = timeline.getBoundingClientRect();
+        const p = limitar((vh * 0.62 - r.top) / r.height, 0, 1);
+        const alcance = p * r.height;
+        progresso.style.transform = `scaleY(${p})`;
+        cabeca.style.transform = `translate3d(0, ${alcance}px, 0)`;
+        cabeca.style.opacity = p > 0 && p < 1 ? 1 : 0;
+        marcos.forEach(m => m.el.classList.toggle('aceso', alcance >= m.topo - 4));
+      }
+
+      function agendar() {
+        if (!agendado) { agendado = true; requestAnimationFrame(atualizar); }
+      }
+
+      window.addEventListener('scroll', agendar, { passive: true });
+      window.addEventListener('resize', () => { medir(); agendar(); });
+      if ('ResizeObserver' in window) new ResizeObserver(() => { medir(); agendar(); }).observe(timeline);
+      medir();
+      atualizar();
+
+      // Item do menu da seção atual
+      const links = $$('#menu a');
+      const obsSecao = new IntersectionObserver(entradas => {
+        entradas.forEach(e => {
+          if (!e.isIntersecting) return;
+          links.forEach(l => l.classList.toggle('ativo', l.getAttribute('href') === '#' + e.target.id));
+        });
+      }, { rootMargin: '-45% 0px -50% 0px' });
+      $$('section').forEach(s => obsSecao.observe(s));
+
+      // Links internos com rolagem suave (sem bagunçar o endereço)
+      $$('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', e => {
+          const alvo = document.querySelector(a.getAttribute('href'));
+          if (!alvo) return;
+          e.preventDefault();
+          alvo.scrollIntoView({ behavior: reduzMovimento ? 'auto' : 'smooth', block: 'start' });
+        });
+      });
+    })();
+
+    /* ==============================================================
+     *  5. ANIMAÇÕES DE SCROLL (Intersection Observer)
+     * ============================================================ */
+    (function () {
+      const obs = new IntersectionObserver(entradas => {
+        let n = 0;
+        entradas.forEach(e => {
+          if (!e.isIntersecting) return;
+          const el = e.target;
+          // Polaroids que aparecem juntas caem uma de cada vez
+          if (el.classList.contains('polaroid')) {
+            el.style.transitionDelay = (n++ * 110) + 'ms';
+            setTimeout(() => { el.style.transitionDelay = ''; }, 1600);
+          }
+          el.classList.add('visivel');
+          obs.unobserve(el);
+        });
+      }, { threshold: 0.12, rootMargin: '0px 0px -6% 0px' });
+
+      $$('.revelar').forEach(el => obs.observe(el));
+
+      // Fotos aparecem suavemente quando terminam de carregar
+      $$('.polaroid-foto img, .marco-foto').forEach(img => {
+        const pronto = () => {
+          img.classList.add('carregada');
+          if (img.parentElement.classList.contains('polaroid-foto')) img.parentElement.classList.add('ok');
+        };
+        if (img.complete && img.naturalWidth) pronto();
+        else img.addEventListener('load', pronto, { once: true });
+        // Se a miniatura não existir, usa a foto grande
+        img.addEventListener('error', () => {
+          const grande = img.dataset.grande;
+          if (grande && img.getAttribute('src') !== grande) img.src = grande;
+        });
+      });
+    })();
+
+    /* ==============================================================
+     *  6. CONTADOR DE TEMPO REAL — RELÓGIO FLIP
+     * ============================================================ */
+    (function () {
       const inicio = new Date(INICIO_ANO, INICIO_MES - 1, INICIO_DIA, INICIO_HORA, INICIO_MIN, 0);
 
-      const elAnos    = document.getElementById('cnt-anos');
-      const elMeses   = document.getElementById('cnt-meses');
-      const elDias    = document.getElementById('cnt-dias');
-      const elHoras   = document.getElementById('cnt-horas');
-      const elMinutos = document.getElementById('cnt-minutos');
-      const elSeg     = document.getElementById('cnt-segundos');
+      const campos = [
+        ['anos',  'Ano',     'Anos'],
+        ['meses', 'Mês',     'Meses'],
+        ['dias',  'Dia',     'Dias'],
+        ['horas', 'Hora',    'Horas'],
+        ['min',   'Minuto',  'Minutos'],
+        ['seg',   'Segundo', 'Segundos'],
+      ].map(([chave, singular, plural]) => {
+        const el = $(`.flip[data-campo="${chave}"]`);
+        return {
+          chave, singular, plural,
+          cima:   $('.cima span', el),
+          baixo:  $('.baixo span', el),
+          frente: $('.frente', el),
+          frenteN: $('.frente span', el),
+          tras:   $('.tras', el),
+          trasN:  $('.tras span', el),
+          label:  $('.contador-label', el.parentElement),
+          mostrado: 0,
+          alvo: 0,
+          virando: false,
+        };
+      });
+      const elTotal = $('#cnt-total');
 
-      function pad(n, tamanho) {
-        return String(n).padStart(tamanho, '0');
-      }
+      function pad(n) { return String(n).padStart(2, '0'); }
 
       function calcularIdade(inicio, agora) {
         let anos  = agora.getFullYear() - inicio.getFullYear();
@@ -1241,164 +3313,724 @@
         // Ajusta dias negativos: pega os dias do mês anterior
         if (dias < 0) {
           meses--;
-          const mesAnterior = new Date(agora.getFullYear(), agora.getMonth(), 0);
-          dias += mesAnterior.getDate();
+          dias += new Date(agora.getFullYear(), agora.getMonth(), 0).getDate();
         }
-
         // Ajusta meses negativos: vira para o ano anterior
-        if (meses < 0) {
-          anos--;
-          meses += 12;
-        }
+        if (meses < 0) { anos--; meses += 12; }
 
         // Horas, minutos e segundos restantes do dia atual
         let horas = agora.getHours()   - inicio.getHours();
         let min   = agora.getMinutes() - inicio.getMinutes();
         let seg   = agora.getSeconds() - inicio.getSeconds();
 
-        if (seg < 0)  { seg += 60; min--; }
-        if (min < 0)  { min += 60; horas--; }
+        if (seg < 0) { seg += 60; min--; }
+        if (min < 0) { min += 60; horas--; }
         if (horas < 0) {
           horas += 24;
           dias--;
           if (dias < 0) {
             meses--;
             if (meses < 0) { meses += 12; anos--; }
-            const mesAnterior2 = new Date(agora.getFullYear(), agora.getMonth(), 0);
-            dias += mesAnterior2.getDate();
+            dias += new Date(agora.getFullYear(), agora.getMonth(), 0).getDate();
           }
         }
-
         return { anos, meses, dias, horas, min, seg };
       }
 
-      function piscar(el) {
-        el.classList.add('atualizado');
-        setTimeout(() => el.classList.remove('atualizado'), 300);
-      }
+      function totalDias(agora) { return Math.floor((agora - inicio) / 86400000); }
 
-      let segAnterior = -1;
+      // Vira a plaquinha: a metade de cima cai e mostra o número novo
+      function virar(c) {
+        if (c.virando || c.mostrado === c.alvo) return;
+        const antigo = pad(c.mostrado);
+        const novo   = pad(c.alvo);
+        c.mostrado = c.alvo;
+        c.label.textContent = c.alvo === 1 ? c.singular : c.plural;
+
+        if (reduzMovimento) {
+          c.cima.textContent = c.baixo.textContent = c.frenteN.textContent = c.trasN.textContent = novo;
+          return;
+        }
+        c.virando = true;
+        c.cima.textContent    = novo;
+        c.trasN.textContent   = novo;
+        c.frenteN.textContent = antigo;
+        c.baixo.textContent   = antigo;
+
+        const cai = c.frente.animate([
+          { transform: 'rotateX(0deg)',   filter: 'brightness(1)' },
+          { transform: 'rotateX(-90deg)', filter: 'brightness(0.55)' }
+        ], { duration: 260, easing: 'cubic-bezier(.55,0,.9,.4)', fill: 'forwards' });
+        const assenta = c.tras.animate([
+          { transform: 'rotateX(90deg)', filter: 'brightness(1.6)' },
+          { transform: 'rotateX(0deg)',  filter: 'brightness(1)' }
+        ], { duration: 340, delay: 260, easing: 'cubic-bezier(.2,.9,.3,1.25)', fill: 'both' });
+
+        assenta.onfinish = () => {
+          c.baixo.textContent   = novo;
+          c.frenteN.textContent = novo;
+          cai.cancel();
+          assenta.cancel();
+          c.virando = false;
+          virar(c);   // se o valor mudou durante a virada
+        };
+      }
 
       function atualizar() {
         const agora = new Date();
-        const { anos, meses, dias, horas, min, seg } = calcularIdade(inicio, agora);
+        const v = calcularIdade(inicio, agora);
+        campos.forEach(c => { c.alvo = v[c.chave]; virar(c); });
+        elTotal.textContent = totalDias(agora).toLocaleString('pt-BR');
+      }
 
-        if (seg !== segAnterior) {
-          segAnterior = seg;
-          elAnos.textContent    = pad(anos,  2);
-          elMeses.textContent   = pad(meses, 2);
-          elDias.textContent    = pad(dias,  2);
-          elHoras.textContent   = pad(horas, 2);
-          elMinutos.textContent = pad(min,   2);
-          elSeg.textContent     = pad(seg,   2);
-          piscar(elSeg);
+      // Barrinha até o próximo aniversário de namoro (calculada sozinha)
+      function aniversario() {
+        const agora = new Date();
+        const anos = calcularIdade(inicio, agora).anos;
+        const ultimo  = new Date(INICIO_ANO + anos,     INICIO_MES - 1, INICIO_DIA, INICIO_HORA, INICIO_MIN);
+        const proximo = new Date(INICIO_ANO + anos + 1, INICIO_MES - 1, INICIO_DIA, INICIO_HORA, INICIO_MIN);
+        const progresso = limitar((agora - ultimo) / (proximo - ultimo), 0, 1);
+        const dia = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+        const faltam = Math.round((dia(proximo) - dia(agora)) / 86400000);
+        const nome = n => n === 1 ? '1 ano' : `${n} anos`;
+        const hojeEhODia = anos > 0 && agora.getDate() === INICIO_DIA && agora.getMonth() === INICIO_MES - 1;
+
+        let texto;
+        if (hojeEhODia)       texto = `Hoje é o nosso aniversário de <strong>${nome(anos)}</strong> de namoro! 💙`;
+        else if (faltam <= 0) texto = `É hoje! Daqui a pouquinho a gente completa <strong>${nome(anos + 1)}</strong> 💍`;
+        else                  texto = `Faltam <strong>${faltam}</strong> ${faltam === 1 ? 'dia' : 'dias'} para os nossos <strong>${nome(anos + 1)}</strong> 💍`;
+
+        $('#aniv-texto').innerHTML = texto;
+        $('#aniv-de').textContent  = anos ? nome(anos) : 'Início';
+        $('#aniv-ate').textContent = nome(anos + 1);
+        requestAnimationFrame(() => {
+          $('#aniv-preenchido').style.width = (progresso * 100) + '%';
+          $('#aniv-coracao').style.left     = (progresso * 100) + '%';
+        });
+      }
+
+      // Ao chegar na seção: as plaquinhas viram em cascata e os dias "sobem"
+      function comecar() {
+        const agora = new Date();
+        const v = calcularIdade(inicio, agora);
+        campos.forEach((c, i) => setTimeout(() => { c.alvo = v[c.chave]; virar(c); }, reduzMovimento ? 0 : i * 150));
+
+        const alvoTotal = totalDias(agora);
+        const duracao = reduzMovimento ? 1 : 1800;
+        const t0 = performance.now();
+        (function passo(t) {
+          const k = limitar((t - t0) / duracao, 0, 1);
+          elTotal.textContent = Math.round(alvoTotal * (1 - Math.pow(1 - k, 3))).toLocaleString('pt-BR');
+          if (k < 1) requestAnimationFrame(passo);
+        })(t0);
+
+        aniversario();
+        setTimeout(() => { atualizar(); setInterval(atualizar, 250); }, reduzMovimento ? 0 : campos.length * 150 + 700);
+      }
+
+      const obs = new IntersectionObserver(entradas => {
+        if (entradas.some(e => e.isIntersecting)) { obs.disconnect(); comecar(); }
+      }, { threshold: 0.3 });
+      obs.observe($('#contador'));
+    })();
+
+    /* ==============================================================
+     *  7. FOTOS: TOQUE ABRE, DOIS TOQUES CURTEM, TELA CHEIA
+     * ============================================================ */
+    (function () {
+      const lb        = $('#lightbox');
+      const palco     = $('#lb-palco');
+      const img       = $('#lb-img');
+      const legenda   = $('#lb-legenda');
+      const contagem  = $('#lb-contagem');
+      const dica      = $('#lb-dica');
+      const btnFechar = $('#lb-fechar');
+      const mural     = $('#mural');
+      const cards     = $$('.polaroid', mural);
+      const fotos = cards.map(card => {
+        const miniatura = $('img', card);
+        return {
+          card,
+          miniatura,
+          grande: miniatura.dataset.grande || miniatura.getAttribute('src'),
+          legenda: $('figcaption', card).textContent.trim(),
+        };
+      });
+
+      let atual = 0, aberto = false, ocupado = false, focoAnterior = null, dicaMostrada = false;
+
+      // Curtidas ficam guardadas neste celular/computador
+      let curtidas = [];
+      try { curtidas = JSON.parse(localStorage.getItem('lp-curtidas') || '[]'); } catch (e) { curtidas = []; }
+      curtidas.forEach(i => fotos[i] && fotos[i].card.classList.add('curtida'));
+      function salvarCurtida(i) {
+        if (curtidas.includes(i)) return;
+        curtidas.push(i);
+        try { localStorage.setItem('lp-curtidas', JSON.stringify(curtidas)); } catch (e) { /* tudo bem */ }
+      }
+
+      function coracaoGrande(alvo) {
+        const c = document.createElement('span');
+        c.className = 'coracao-curtir';
+        c.textContent = '♥';
+        alvo.appendChild(c);
+        c.addEventListener('animationend', () => c.remove());
+        const r = alvo.getBoundingClientRect();
+        explodirCoracoes(r.left + r.width / 2, r.top + r.height / 2, 12, 110);
+        vibrar(30);
+      }
+
+      function curtir(i, alvo) {
+        fotos[i].card.classList.add('curtida');
+        salvarCurtida(i);
+        coracaoGrande(alvo);
+      }
+
+      // Tamanho da foto na tela (sem pulos quando a versão grande carrega)
+      function tamanhoNaTela(largura, altura) {
+        const desktop = window.innerWidth >= 768;
+        const baixa   = window.innerHeight < 520;
+        const maxW = window.innerWidth - (desktop ? 170 : 24);
+        const maxH = window.innerHeight - (baixa ? 100 : desktop ? 170 : 190);
+        const prop = largura / altura;
+        const w = Math.min(maxW, maxH * prop);
+        return [w, w / prop];
+      }
+
+      function aplicarTamanho(largura, altura) {
+        const [w, h] = tamanhoNaTela(largura, altura);
+        img.style.width  = w + 'px';
+        img.style.height = h + 'px';
+      }
+
+      function mostrar(i) {
+        const f = fotos[i];
+        const m = f.miniatura;
+        aplicarTamanho(m.naturalWidth || 4, m.naturalHeight || 5);
+        img.src = m.currentSrc || m.src;
+        img.alt = f.legenda;
+        legenda.textContent = f.legenda;
+        contagem.textContent = `${i + 1} / ${fotos.length}`;
+
+        const grande = new Image();
+        grande.src = f.grande;
+        grande.decode().then(() => {
+          if (atual !== i || !aberto) return;
+          aplicarTamanho(grande.naturalWidth, grande.naturalHeight);
+          img.src = f.grande;
+        }).catch(() => {});
+
+        // Já deixa as vizinhas carregando
+        [1, -1].forEach(d => { new Image().src = fotos[(i + d + fotos.length) % fotos.length].grande; });
+      }
+
+      // "FLIP": a foto cresce a partir de onde ela está na página
+      function caminhoDe(origem) {
+        const o = origem.getBoundingClientRect();
+        const d = img.getBoundingClientRect();
+        const ow = origem.offsetWidth  || o.width;
+        const oh = origem.offsetHeight || o.height;
+        const s  = Math.max(ow / d.width, oh / d.height);
+        const dx = (o.left + o.width / 2) - (d.left + d.width / 2);
+        const dy = (o.top + o.height / 2) - (d.top + d.height / 2);
+        const ix = Math.max(0, (d.width  - ow / s) / 2);
+        const iy = Math.max(0, (d.height - oh / s) / 2);
+        let rot = 0;
+        const polaroid = origem.closest('.polaroid');
+        if (polaroid) {
+          const t = getComputedStyle(polaroid).transform;
+          if (t && t !== 'none') { const mtx = new DOMMatrix(t); rot = Math.atan2(mtx.b, mtx.a) * 180 / Math.PI; }
+        }
+        return {
+          transform: `translate(${dx}px, ${dy}px) rotate(${rot}deg) scale(${s})`,
+          clipPath: `inset(${iy}px ${ix}px round ${3 / s}px)`,
+        };
+      }
+
+      function abrir(i, origem) {
+        if (aberto) return;
+        aberto = true;
+        atual = i;
+        focoAnterior = document.activeElement;
+        travar();
+        img.style.transform = '';
+        mostrar(i);
+        lb.classList.add('aberto');
+        const fim = { transform: 'none', clipPath: 'inset(0px 0px round 8px)' };
+        const comecar = () => {
+          lb.classList.add('visivel');
+          if (!reduzMovimento && origem) {
+            img.animate([caminhoDe(origem), fim], { duration: 520, easing: 'cubic-bezier(.2,.8,.2,1)' });
+          }
+        };
+        (img.decode ? img.decode() : Promise.resolve()).catch(() => {}).then(comecar);
+        btnFechar.focus({ preventScroll: true });
+
+        if (!dicaMostrada && window.matchMedia('(hover: none)').matches) {
+          dicaMostrada = true;
+          setTimeout(() => dica.classList.add('mostrar'), 700);
+          setTimeout(() => dica.classList.remove('mostrar'), 3400);
         }
       }
 
-      atualizar();
-      setInterval(atualizar, 500);
+      function fechar() {
+        if (!aberto) return;
+        aberto = false;
+        const destino = fotos[atual].miniatura;
+        const r = destino.getBoundingClientRect();
+        const visivel = r.width > 0 && r.bottom > 0 && r.top < window.innerHeight;
+        const transformAtual = img.style.transform || 'none';
+        img.style.transform = '';
+        lb.classList.remove('visivel');
+        dica.classList.remove('mostrar');
+
+        const terminar = () => {
+          lb.classList.remove('aberto');
+          img.getAnimations().forEach(a => a.cancel());
+          img.removeAttribute('src');
+          destravar();
+          if (focoAnterior && focoAnterior.focus) focoAnterior.focus({ preventScroll: true });
+        };
+        if (reduzMovimento) { terminar(); return; }
+
+        const anim = visivel
+          ? img.animate([{ transform: transformAtual, clipPath: 'inset(0px 0px round 8px)' }, caminhoDe(destino)],
+                        { duration: 440, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' })
+          : img.animate([{ transform: transformAtual, opacity: 1 }, { transform: 'scale(0.85)', opacity: 0 }],
+                        { duration: 300, easing: 'ease-in', fill: 'forwards' });
+        anim.onfinish = terminar;
+      }
+
+      function navegar(direcao) {
+        if (ocupado || !aberto) return;
+        ocupado = true;
+        dica.classList.remove('mostrar');
+        const transformAtual = img.style.transform || 'none';
+        img.style.transform = '';
+        if (reduzMovimento) {
+          atual = (atual + direcao + fotos.length) % fotos.length;
+          mostrar(atual);
+          ocupado = false;
+          return;
+        }
+        const saida = img.animate([
+          { transform: transformAtual, opacity: 1 },
+          { transform: `translateX(${-direcao * 45}vw) rotate(${-direcao * 6}deg)`, opacity: 0 }
+        ], { duration: 200, easing: 'ease-in', fill: 'forwards' });
+        saida.onfinish = () => {
+          atual = (atual + direcao + fotos.length) % fotos.length;
+          mostrar(atual);
+          saida.cancel();
+          img.animate([
+            { transform: `translateX(${direcao * 45}vw) rotate(${direcao * 6}deg)`, opacity: 0 },
+            { transform: 'none', opacity: 1 }
+          ], { duration: 340, easing: 'cubic-bezier(.2,.8,.2,1)' }).onfinish = () => { ocupado = false; };
+        };
+      }
+
+      // Toques no mural: 1 toque abre, 2 toques curtem
+      let ultimoToque = { t: 0, card: null };
+      let timerToque;
+      mural.addEventListener('click', e => {
+        const card = e.target.closest('.polaroid');
+        if (!card) return;
+        const i = cards.indexOf(card);
+        const agora = performance.now();
+        clearTimeout(timerToque);
+        if (ultimoToque.card === card && agora - ultimoToque.t < 330) {
+          ultimoToque = { t: 0, card: null };
+          curtir(i, $('.polaroid-foto', card));
+          return;
+        }
+        ultimoToque = { t: agora, card };
+        timerToque = setTimeout(() => abrir(i, fotos[i].miniatura), 270);
+      });
+      cards.forEach((card, i) => {
+        card.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrir(i, fotos[i].miniatura); }
+        });
+      });
+
+      // Fotos da linha do tempo também abrem em tela cheia
+      $$('.marco-foto').forEach(foto => {
+        foto.addEventListener('click', () => {
+          const i = fotos.findIndex(f => f.grande === foto.dataset.grande);
+          if (i >= 0) abrir(i, foto);
+        });
+      });
+
+      // Arrastar dentro da tela cheia
+      let arraste = null;
+      let ultimoToqueFoto = 0;
+      palco.addEventListener('pointerdown', e => {
+        if (!aberto || ocupado) return;
+        arraste = { x: e.clientX, y: e.clientY, dx: 0, dy: 0, eixo: null, id: e.pointerId, naFoto: e.target === img };
+        palco.setPointerCapture(e.pointerId);
+      });
+      palco.addEventListener('pointermove', e => {
+        if (!arraste || e.pointerId !== arraste.id) return;
+        arraste.dx = e.clientX - arraste.x;
+        arraste.dy = e.clientY - arraste.y;
+        if (!arraste.eixo && Math.hypot(arraste.dx, arraste.dy) > 10) {
+          arraste.eixo = Math.abs(arraste.dx) > Math.abs(arraste.dy) ? 'x' : 'y';
+        }
+        if (arraste.eixo === 'x') {
+          img.style.transform = `translateX(${arraste.dx}px) rotate(${arraste.dx * 0.02}deg)`;
+        } else if (arraste.eixo === 'y' && arraste.dy > 0) {
+          img.style.transform = `translateY(${arraste.dy}px) scale(${1 - arraste.dy / 1800})`;
+          $('.lb-fundo', lb).style.opacity = limitar(1 - arraste.dy / 450, 0.3, 1);
+        }
+      });
+      function soltar(e, cancelado) {
+        if (!arraste || (e && e.pointerId !== arraste.id)) return;
+        const a = arraste;
+        arraste = null;
+        $('.lb-fundo', lb).style.opacity = '';
+
+        if (!cancelado && a.eixo === 'x' && Math.abs(a.dx) > 60) { navegar(a.dx < 0 ? 1 : -1); return; }
+        if (!cancelado && a.eixo === 'y' && a.dy > 110) { fechar(); return; }
+        if (!cancelado && !a.eixo) {
+          if (!a.naFoto) { fechar(); return; }
+          const agora = performance.now();
+          if (agora - ultimoToqueFoto < 330) { ultimoToqueFoto = 0; curtir(atual, palco); }
+          else ultimoToqueFoto = agora;
+          return;
+        }
+        // Volta pro lugar com efeito mola
+        const de = img.style.transform;
+        img.style.transform = '';
+        if (de) img.animate([{ transform: de }, { transform: 'none' }], { duration: 420, easing: 'cubic-bezier(.34,1.56,.64,1)' });
+      }
+      palco.addEventListener('pointerup', e => soltar(e, false));
+      palco.addEventListener('pointercancel', e => soltar(e, true));
+
+      btnFechar.addEventListener('click', fechar);
+      $('#lb-ant').addEventListener('click', () => navegar(-1));
+      $('#lb-prox').addEventListener('click', () => navegar(1));
+      document.addEventListener('keydown', e => {
+        if (!aberto) return;
+        if (e.key === 'Escape') fechar();
+        else if (e.key === 'ArrowRight') navegar(1);
+        else if (e.key === 'ArrowLeft') navegar(-1);
+      });
+      window.addEventListener('resize', () => {
+        if (aberto && img.naturalWidth) aplicarTamanho(img.naturalWidth, img.naturalHeight);
+      });
     })();
 
     /* ==============================================================
-     *  3. ANIMAÇÕES DE SCROLL (Intersection Observer)
+     *  8. MOTIVOS PRA TE AMAR — BARALHO
      * ============================================================ */
-    (function() {
-      const obs = new IntersectionObserver(
-        (entries) => {
-          entries.forEach(e => {
-            if (e.isIntersecting) {
-              e.target.classList.add('visivel');
-            }
-          });
-        },
-        { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
-      );
+    (function () {
+      const mover    = $('#cm-mover');
+      const carta    = $('#carta-motivo');
+      const texto    = $('#cm-texto');
+      const numero   = $('#cm-num');
+      const contagem = $('#motivos-contagem');
+      const botao    = $('#btn-motivo');
+      const total    = MOTIVOS.length;
 
-      document.querySelectorAll('.revelar').forEach(el => obs.observe(el));
+      function embaralhar(lista) {
+        const a = lista.slice();
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+
+      let ordem = embaralhar(MOTIVOS);
+      let pos = -1;
+      let noFinal = false;
+      let ocupado = false;
+
+      function atualizarContagem() {
+        if (pos < 0)      contagem.innerHTML = `${total} motivos esperando por você`;
+        else if (noFinal) contagem.innerHTML = 'E a lista não acaba nunca... 💙';
+        else              contagem.innerHTML = `Motivo <b>${pos + 1}</b> de ${total}`;
+      }
+
+      function preencher() {
+        noFinal = pos >= total;
+        numero.textContent = noFinal ? '∞' : '#' + (pos + 1);
+        texto.textContent  = noFinal ? MOTIVO_FINAL : ordem[pos];
+        botao.textContent  = noFinal ? 'Embaralhar de novo 🔁' : 'Mais um motivo 💙';
+        atualizarContagem();
+      }
+
+      function virar() {
+        carta.classList.add('virada');
+        setTimeout(() => {
+          const r = mover.getBoundingClientRect();
+          explodirCoracoes(r.left + r.width / 2, r.top + r.height / 2, 14, 160);
+          vibrar(15);
+        }, 380);
+        setTimeout(() => { ocupado = false; }, 820);
+      }
+
+      function avancar(direcao = 1, deX = 0) {
+        if (ocupado) return;
+        ocupado = true;
+
+        // Carta ainda virada pra baixo: só vira
+        if (!carta.classList.contains('virada')) { pos++; preencher(); virar(); return; }
+
+        // Carta mostrando um motivo: joga pro lado e puxa a próxima do monte
+        const sai = mover.animate([
+          { transform: `translateX(${deX}px) rotate(${deX * 0.06}deg)`, opacity: 1 },
+          { transform: `translateX(${direcao * 130}%) rotate(${direcao * 20}deg)`, opacity: 0 }
+        ], { duration: reduzMovimento ? 1 : 380, easing: 'cubic-bezier(.5,0,.75,0)', fill: 'forwards' });
+
+        sai.onfinish = () => {
+          mover.style.transform = '';
+          carta.style.transition = 'none';
+          carta.classList.remove('virada');
+          void carta.offsetWidth;
+          carta.style.transition = '';
+          if (noFinal) { ordem = embaralhar(MOTIVOS); pos = -1; }
+          sai.cancel();
+          const entra = mover.animate([
+            { transform: 'translateY(26px) scale(0.9)', opacity: 0 },
+            { transform: 'none', opacity: 1 }
+          ], { duration: reduzMovimento ? 1 : 420, easing: 'cubic-bezier(.16,1,.3,1)' });
+          entra.onfinish = () => { pos++; preencher(); virar(); };
+        };
+      }
+
+      // Toque, arraste pro lado ou teclado
+      let arraste = null;
+      mover.addEventListener('pointerdown', e => {
+        if (ocupado) return;
+        arraste = { x: e.clientX, y: e.clientY, dx: 0, eixo: null, id: e.pointerId };
+      });
+      mover.addEventListener('pointermove', e => {
+        if (!arraste || e.pointerId !== arraste.id) return;
+        const dx = e.clientX - arraste.x;
+        const dy = e.clientY - arraste.y;
+        if (!arraste.eixo && Math.hypot(dx, dy) > 8) {
+          arraste.eixo = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+          if (arraste.eixo === 'x') mover.setPointerCapture(e.pointerId);
+        }
+        if (arraste.eixo === 'x' && carta.classList.contains('virada')) {
+          arraste.dx = dx;
+          mover.style.transform = `translateX(${dx}px) rotate(${dx * 0.06}deg)`;
+        }
+      });
+      function voltarAoLugar() {
+        const de = mover.style.transform;
+        mover.style.transform = '';
+        if (de) mover.animate([{ transform: de }, { transform: 'none' }], { duration: 420, easing: 'cubic-bezier(.34,1.56,.64,1)' });
+      }
+      mover.addEventListener('pointerup', e => {
+        if (!arraste || e.pointerId !== arraste.id) return;
+        const a = arraste;
+        arraste = null;
+        if (!a.eixo) { avancar(1); return; }
+        if (a.eixo === 'x' && !carta.classList.contains('virada')) { avancar(1); return; }
+        if (a.eixo === 'x' && Math.abs(a.dx) > 80) { avancar(Math.sign(a.dx), a.dx); return; }
+        voltarAoLugar();
+      });
+      mover.addEventListener('pointercancel', () => { arraste = null; voltarAoLugar(); });
+      mover.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); avancar(1); }
+      });
+      botao.addEventListener('click', () => avancar(1));
+
+      atualizarContagem();
     })();
 
     /* ==============================================================
-     *  4. ANIMAÇÃO DE MÁQUINA DE ESCREVER (Título da Carta)
+     *  9. A CARTA: MÁQUINA DE ESCREVER + PARÁGRAFOS EM SEQUÊNCIA
      * ============================================================ */
-    (function() {
-      const titulo = TITULO_CARTA;
-      const el     = document.getElementById('carta-titulo-digitando');
-      const cursor = document.getElementById('cursor-carta');
-      let   idx    = 0;
-      let   iniciou = false;
+    (function () {
+      const el      = $('#carta-titulo-digitando');
+      const cursor  = $('#cursor-carta');
+      const cartao  = $('.carta-card');
+      const partes  = $$('.carta-paragrafo, .carta-assinatura, .carta-ps');
 
-      // Só começa quando o elemento entrar na tela
-      const obs = new IntersectionObserver(
-        (entries) => {
-          entries.forEach(e => {
-            if (e.isIntersecting && !iniciou) {
-              iniciou = true;
-              obs.disconnect();
-              setTimeout(digitar, 400);
-            }
-          });
-        },
-        { threshold: 0.4 }
-      );
+      // Os parágrafos só aparecem DEPOIS que o título termina de ser digitado
+      const fila = [];
+      let processando = false;
+      function proximoDaFila() {
+        if (processando) return;
+        const prox = fila.shift();
+        if (!prox) return;
+        processando = true;
+        prox.classList.add('visivel');
+        setTimeout(() => { processando = false; proximoDaFila(); }, reduzMovimento ? 0 : 480);
+      }
+      const obsPartes = new IntersectionObserver(entradas => {
+        entradas.forEach(e => {
+          if (!e.isIntersecting) return;
+          fila.push(e.target);
+          obsPartes.unobserve(e.target);
+        });
+        proximoDaFila();
+      }, { threshold: 0.2 });
 
-      const cartaCard = document.querySelector('.carta-card');
-      if (cartaCard) obs.observe(cartaCard);
+      function liberarParagrafos() { partes.forEach(p => obsPartes.observe(p)); }
 
       function digitar() {
-        if (idx <= titulo.length) {
-          el.textContent = titulo.slice(0, idx);
-          idx++;
-          setTimeout(digitar, 55);
-        } else {
-          // Cursor some após terminar
-          setTimeout(() => {
-            if (cursor) cursor.style.display = 'none';
-          }, 1500);
-          revelarParafagos();
+        if (reduzMovimento) {
+          el.textContent = TITULO_CARTA;
+          cursor.style.display = 'none';
+          liberarParagrafos();
+          return;
         }
+        let i = 0;
+        (function letra() {
+          el.textContent = TITULO_CARTA.slice(0, i);
+          if (i++ < TITULO_CARTA.length) { setTimeout(letra, 55); return; }
+          setTimeout(() => { cursor.style.display = 'none'; }, 1500);
+          setTimeout(liberarParagrafos, 250);
+        })();
       }
+
+      const obs = new IntersectionObserver(entradas => {
+        if (entradas.some(e => e.isIntersecting)) { obs.disconnect(); setTimeout(digitar, 450); }
+      }, { threshold: 0.3 });
+      obs.observe(cartao);
     })();
 
     /* ==============================================================
-     *  5. REVELAÇÃO SEQUENCIAL DOS PARÁGRAFOS DA CARTA
+     *  10. SURPRESA FINAL — O "NÃO" QUE FOGE
      * ============================================================ */
-    function revelarParafagos() {
-      const ids   = ['p1', 'p2', 'p3', 'p4', 'carta-assinatura'];
-      const delay = 500;
-      ids.forEach((id, i) => {
+    (function () {
+      const area     = $('#surpresa-area');
+      const sim      = $('#btn-sim');
+      const nao      = $('#btn-nao');
+      const resposta = $('#surpresa-resposta');
+
+      let fugas = 0;
+      let rendido = false;
+      let respondeu = false;
+      let ultimaFuga = 0;
+      let pos = { x: 0, y: 0 };
+
+      function fugir(e) {
+        if (respondeu || rendido) return;
+        if (e && e.cancelable) e.preventDefault();
+        ultimaFuga = performance.now();
+        fugas++;
+
+        if (fugas >= TEXTOS_NAO.length) {
+          rendido = true;
+          nao.textContent = TEXTO_NAO_FINAL;
+          nao.classList.add('rendido');
+        } else {
+          nao.textContent = TEXTOS_NAO[fugas];
+        }
+
+        const escalaSim = Math.min(1.45, 1 + fugas * 0.07);
+        const escalaNao = rendido ? 1 : Math.max(0.6, 1 - fugas * 0.06);
+
+        // O "Sim" desliza pro centro e vai crescendo
+        const aw = area.clientWidth, ah = area.clientHeight;
+        sim.style.setProperty('--centro', (aw / 2 - (sim.offsetLeft + sim.offsetWidth / 2)) + 'px');
+        sim.style.setProperty('--escala', escalaSim);
+
+        // Procura um lugar livre dentro da área, longe do "Sim"
+        const bw = nao.offsetWidth, bh = nao.offsetHeight;
+        const bx = nao.offsetLeft,  by = nao.offsetTop;
+        const folga = 14;
+        const sw = sim.offsetWidth * escalaSim, sh = sim.offsetHeight * escalaSim;
+        const s = {
+          x: aw / 2 - sw / 2 - folga,
+          y: sim.offsetTop + sim.offsetHeight / 2 - sh / 2 - folga,
+          w: sw + folga * 2,
+          h: sh + folga * 2,
+        };
+        let novo = null;
+        for (let t = 0; t < 40 && !novo; t++) {
+          const ax = Math.random() * Math.max(0, aw - bw);
+          const ay = Math.random() * Math.max(0, ah - bh);
+          const encosta = ax < s.x + s.w && ax + bw > s.x && ay < s.y + s.h && ay + bh > s.y;
+          const longe = Math.hypot(ax - bx - pos.x, ay - by - pos.y) > 90;
+          if (!encosta && longe) novo = { x: ax - bx, y: ay - by };
+        }
+        if (novo) pos = novo;
+        nao.style.transform = `translate(${pos.x}px, ${pos.y}px) scale(${escalaNao})`;
+        vibrar(12);
+      }
+
+      function responderSim() {
+        if (respondeu) return;
+        respondeu = true;
+        vibrar([60, 40, 140]);
+        const r = sim.getBoundingClientRect();
+        explodirCoracoes(r.left + r.width / 2, r.top + r.height / 2, 40, 230);
+        chuvaDeCoracoes();
+        area.classList.add('sumindo');
         setTimeout(() => {
-          const el = document.getElementById(id);
-          if (el) el.classList.add('visivel');
-        }, i * delay);
-      });
-    }
+          area.hidden = true;
+          resposta.hidden = false;
+          void resposta.offsetWidth;
+          resposta.classList.add('visivel');
+        }, 450);
+      }
 
-    // Fallback: se o usuário já estiver na carta ao carregar
-    (function() {
-      const obs = new IntersectionObserver(
-        (entries) => {
-          entries.forEach(e => {
-            if (e.isIntersecting) {
-              revelarParafagos();
-              obs.disconnect();
-            }
-          });
-        },
-        { threshold: 0.3 }
-      );
-      const carta = document.getElementById('carta');
-      if (carta) obs.observe(carta);
+      nao.addEventListener('pointerdown', e => { if (!rendido) fugir(e); });
+      nao.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') fugir(); });
+      nao.addEventListener('click', e => {
+        if (rendido) { responderSim(); return; }
+        if (performance.now() - ultimaFuga > 500) fugir(e);
+      });
+      sim.addEventListener('click', responderSim);
     })();
 
     /* ==============================================================
-     *  6. EFEITO DE TOQUE NOS NÚMEROS DO CONTADOR (mobile)
+     *  11. SEGREDO: 5 TOQUES NO CORAÇÃO DO RODAPÉ
      * ============================================================ */
-    document.querySelectorAll('.contador-numero').forEach(el => {
-      el.addEventListener('click', () => {
-        el.classList.add('atualizado');
-        setTimeout(() => el.classList.remove('atualizado'), 400);
+    (function () {
+      const coracao = $('#coracao-segredo');
+      const dica    = $('#dica-segredo');
+      const modal   = $('#segredo');
+      const fechar  = $('#segredo-fechar');
+      let toques = 0;
+      let timer;
+      let aberto = false;
+
+      function abrirSegredo() {
+        aberto = true;
+        travar();
+        modal.classList.add('aberto');
+        setTimeout(() => fechar.focus({ preventScroll: true }), 50);
+      }
+      function fecharSegredo() {
+        if (!aberto) return;
+        aberto = false;
+        modal.classList.remove('aberto');
+        destravar();
+        coracao.focus({ preventScroll: true });
+      }
+
+      coracao.addEventListener('click', () => {
+        toques++;
+        clearTimeout(timer);
+        timer = setTimeout(() => { toques = 0; coracao.style.setProperty('--s', 1); }, 2500);
+        const r = coracao.getBoundingClientRect();
+        const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+        vibrar(15);
+        if (toques >= 5) {
+          toques = 0;
+          coracao.style.setProperty('--s', 1);
+          explodirCoracoes(cx, cy, 36, 200);
+          setTimeout(abrirSegredo, 350);
+        } else {
+          coracao.style.setProperty('--s', 1 + toques * 0.18);
+          explodirCoracoes(cx, cy, 5 + toques * 2, 60 + toques * 12);
+        }
       });
-    });
+
+      fechar.addEventListener('click', fecharSegredo);
+      modal.addEventListener('click', e => { if (e.target === modal) fecharSegredo(); });
+      document.addEventListener('keydown', e => { if (e.key === 'Escape') fecharSegredo(); });
+
+      const obs = new IntersectionObserver(entradas => {
+        if (entradas.some(e => e.isIntersecting)) { obs.disconnect(); setTimeout(() => dica.classList.add('visivel'), 1200); }
+      }, { threshold: 0.6 });
+      obs.observe(coracao);
+    })();
   </script>
 
 </body>
